@@ -1,0 +1,3114 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>كشكولي - نظام إدارة محل الملابس</title>
+    
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIuCasOaYseaVmeeVmiAtINCd0L7RgdCw0Lwg0YPQv9GA0LDQstC70LXQvdC40Y8g0LzQvtC70LDQt9C90LDRh9C10LzRgdC60L7QuSDQvtC00LXQttC00YsiLAogICJzaG9ydF9uYW1lIjogIuCasOaYseaVmeeVmiIsCiAgImRlc2NyaXB0aW9uIjogItCg0L7RgdGB0LjQuNGB0LrQuNC5INGC0LXRgNC80LjQv9Cw0LvRjNC90YvQuSDQtNC70Y8g0YPRgdC70YPQs9C4INC+0LTQtdC20LTQvtC5IiwKICAic3RhcnRfdXJsIjogImluZGV4Lmh0bWwiLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmZmZmZmYiLAogICJ0aGVtZV9jb2xvciI6ICIjZmZmZmZmIiwKICAib3JpZW50YXRpb24iOiAicG9ydHJhaXQtcHJpbWFyeSIsCiAgImRpciI6ICJydGwiLAogICJsYW5nIjogImFyIgp9">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #1a1a2e;
+            --primary-light: #16213e;
+            --secondary: #0f3460;
+            --accent: #e94560;
+            --accent-light: #ff6b6b;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #e17055;
+            --bg: #f0f2f5;
+            --card: #ffffff;
+            --text: #2d3436;
+            --text-light: #636e72;
+            --border: #dfe6e9;
+            --shadow: 0 2px 16px rgba(0,0,0,0.08);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Cairo', 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--secondary); border-radius: 10px; }
+
+        .app-header {
+            background: var(--primary);
+            color: #fff;
+            padding: 12px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+        }
+
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .brand-text { display: flex; flex-direction: column; }
+        .brand-text h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.2; }
+        .brand-text span { font-size: 11px; opacity: 0.7; font-weight: 300; letter-spacing: 0.5px; }
+
+        .header-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+        }
+
+        .sync-label {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .sync-label i { font-size: 12px; }
+
+        .tab-nav {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            padding: 0 16px;
+            overflow-x: auto;
+            display: flex;
+            gap: 4px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .tab-nav::-webkit-scrollbar { display: none; }
+
+        .tab-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 18px;
+            border: none;
+            background: transparent;
+            color: var(--text-light);
+            font-family: 'Cairo', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .tab-btn i { font-size: 16px; width: 20px; text-align: center; }
+        .tab-btn:hover { color: var(--primary); background: var(--bg); }
+        .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        .tab-panel {
+            display: none;
+            animation: fadeUp 0.35s ease;
+        }
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--card);
+            padding: 18px 16px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: var(--transition);
+            border-top: 4px solid var(--secondary);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+        }
+
+        .stat-card .stat-icon { font-size: 22px; color: var(--secondary); margin-bottom: 4px; }
+        .stat-card .stat-label { font-size: 12px; color: var(--text-light); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+        .stat-card .stat-value { font-size: 22px; font-weight: 800; color: var(--primary); display: block; margin-top: 2px; }
+
+        .stat-card.accent { border-top-color: var(--accent); }
+        .stat-card.accent .stat-icon { color: var(--accent); }
+        .stat-card.accent .stat-value { color: var(--accent); }
+        .stat-card.success { border-top-color: var(--success); }
+        .stat-card.success .stat-icon { color: var(--success); }
+        .stat-card.success .stat-value { color: var(--success); }
+        .stat-card.warning { border-top-color: var(--warning); }
+        .stat-card.warning .stat-icon { color: var(--warning); }
+        .stat-card.warning .stat-value { color: #b7950b; }
+
+        .search-box {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 4px 16px 4px 4px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            border: 2px solid transparent;
+            transition: var(--transition);
+        }
+
+        .search-box:focus-within { border-color: var(--secondary); }
+        .search-box i { color: var(--text-light); font-size: 16px; }
+        .search-box input {
+            flex: 1;
+            border: none;
+            padding: 12px 0;
+            font-family: 'Cairo', sans-serif;
+            font-size: 15px;
+            background: transparent;
+            outline: none;
+            color: var(--text);
+        }
+        .search-box input::placeholder { color: var(--text-light); opacity: 0.7; }
+
+        .search-results {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            max-height: 340px;
+            overflow-y: auto;
+            display: none;
+        }
+        .search-results.has-results { display: block; }
+
+        .search-result-item {
+            padding: 12px 18px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .search-result-item:hover { background: var(--bg); }
+        .search-result-item .name { font-weight: 600; }
+        .search-result-item .detail { font-size: 13px; color: var(--text-light); }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .section-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-header h2 i { color: var(--accent); font-size: 22px; }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: 'Cairo', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .btn i { font-size: 15px; }
+
+        .btn-primary { background: var(--secondary); color: #fff; }
+        .btn-primary:hover { background: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(15,52,96,0.3); }
+
+        .btn-success { background: var(--success); color: #fff; }
+        .btn-success:hover { background: #00a381; transform: translateY(-2px); }
+
+        .btn-danger { background: var(--danger); color: #fff; }
+        .btn-danger:hover { background: #d63031; transform: translateY(-2px); }
+
+        .btn-warning { background: var(--warning); color: #2d3436; }
+        .btn-warning:hover { background: #fdcb6e; transform: translateY(-2px); }
+
+        .btn-outline { background: transparent; color: var(--secondary); border: 2px solid var(--secondary); }
+        .btn-outline:hover { background: var(--secondary); color: #fff; }
+
+        .btn-sm { padding: 6px 14px; font-size: 12px; }
+
+        .card-list { display: flex; flex-direction: column; gap: 12px; }
+
+        .card-item {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border-right: 4px solid var(--secondary);
+            cursor: pointer;
+        }
+
+        .card-item:hover {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transform: translateX(-4px);
+        }
+
+        .card-item .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .card-item .card-title {
+            font-weight: 700;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-item .card-title i { color: var(--secondary); width: 20px; }
+
+        .card-item .card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 18px;
+            margin-top: 6px;
+            font-size: 13px;
+            color: var(--text-light);
+        }
+        .card-item .card-meta i { width: 16px; margin-left: 4px; }
+
+        .card-item .card-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .card-item .card-actions .btn { padding: 4px 12px; font-size: 12px; }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-danger { background: #f8d7da; color: #721c24; }
+        .badge-warning { background: #fff3cd; color: #856404; }
+        .badge-info { background: #d1ecf1; color: #0c5460; }
+        .badge-secondary { background: #e2e3e5; color: #383d41; }
+
+        .balance-positive { color: var(--danger); font-weight: 700; }
+        .balance-zero { color: var(--success); font-weight: 700; }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 14px;
+        }
+
+        .product-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 16px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        .product-card:hover { transform: translateY(-3px); box-shadow: 0 6px 24px rgba(0,0,0,0.1); }
+        .product-card .product-name { font-weight: 700; font-size: 15px; }
+        .product-card .product-detail { font-size: 13px; color: var(--text-light); margin-top: 4px; }
+        .product-card .product-stock { margin-top: 8px; font-weight: 600; font-size: 14px; }
+        .stock-low { color: var(--warning); }
+        .stock-out { color: var(--danger); }
+        .stock-ok { color: var(--success); }
+
+        .task-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 14px 18px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border-right: 4px solid var(--secondary);
+        }
+        .task-card.completed { opacity: 0.6; border-right-color: var(--success); }
+        .task-card .task-info { flex: 1; }
+        .task-card .task-title { font-weight: 600; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .task-card .task-details { font-size: 13px; color: var(--text-light); }
+        .task-card .task-actions { display: flex; gap: 6px; }
+        .priority-high { border-right-color: var(--danger); }
+        .priority-medium { border-right-color: var(--warning); }
+        .priority-low { border-right-color: var(--secondary); }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background: var(--card);
+            border-radius: var(--radius);
+            max-width: 560px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 28px 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .modal-header h2 i { color: var(--accent); }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: var(--transition);
+            padding: 4px 8px;
+        }
+        .modal-close:hover { color: var(--danger); transform: rotate(90deg); }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 4px; color: var(--text); }
+        .form-group label .required { color: var(--danger); }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: 'Cairo', sans-serif;
+            font-size: 14px;
+            transition: var(--transition);
+            background: var(--card);
+            color: var(--text);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(15,52,96,0.1);
+        }
+        .form-group textarea { min-height: 60px; resize: vertical; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        .items-list {
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            margin-bottom: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .item-entry {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            background: var(--card);
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .item-entry .item-remove {
+            color: var(--danger);
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 16px;
+        }
+
+        .add-item-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: var(--secondary);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-size: 13px;
+            transition: var(--transition);
+        }
+        .add-item-btn:hover { background: var(--primary); }
+
+        .total-amount-display {
+            background: var(--secondary);
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            text-align: center;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-width: 380px;
+            width: 100%;
+        }
+
+        .toast {
+            padding: 14px 20px;
+            border-radius: var(--radius-sm);
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.2);
+            animation: slideUp 0.4s ease;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .toast i { font-size: 18px; }
+        .toast-success { background: var(--success); }
+        .toast-error { background: var(--danger); }
+        .toast-warning { background: #e17055; }
+        .toast-info { background: var(--secondary); }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-light);
+        }
+        .empty-state i { font-size: 48px; color: var(--border); margin-bottom: 12px; display: block; }
+        .empty-state h3 { font-size: 18px; color: var(--text); margin-bottom: 4px; }
+        .empty-state p { font-size: 14px; }
+
+        .invoice-print {
+            background: #fff;
+            padding: 30px;
+            font-family: 'Cairo', sans-serif;
+            direction: rtl;
+        }
+        .invoice-print .invoice-title { text-align: center; font-size: 24px; font-weight: 800; color: var(--primary); border-bottom: 2px solid var(--border); padding-bottom: 12px; margin-bottom: 16px; }
+        .invoice-print .invoice-sub { text-align: center; color: var(--text-light); margin-bottom: 20px; }
+        .invoice-print .invoice-customer { margin-bottom: 16px; }
+        .invoice-print .invoice-customer p { margin: 2px 0; }
+        .invoice-print table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+        .invoice-print table th,
+        .invoice-print table td { border: 1px solid var(--border); padding: 8px 12px; text-align: right; }
+        .invoice-print table th { background: var(--bg); font-weight: 700; }
+        .invoice-print .invoice-totals { text-align: left; margin-top: 12px; }
+        .invoice-print .invoice-totals p { margin: 4px 0; font-weight: 600; }
+        .invoice-print .invoice-status { text-align: center; padding: 8px; border-radius: var(--radius-sm); margin-top: 16px; font-weight: 700; }
+
+        .settings-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+        .settings-card h3 { font-size: 17px; font-weight: 700; color: var(--primary); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+        .settings-card h3 i { color: var(--accent); }
+
+        .restore-options { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .restore-option { background: var(--bg); border-radius: var(--radius-sm); padding: 16px; }
+        .restore-option h4 { font-size: 14px; margin-bottom: 8px; }
+        .restore-preview { margin-top: 16px; padding: 16px; background: var(--bg); border-radius: var(--radius-sm); display: none; }
+        .restore-preview.visible { display: block; }
+
+        @media (max-width: 640px) {
+            .header-inner { flex-direction: column; align-items: stretch; gap: 6px; }
+            .brand { justify-content: center; }
+            .header-status { justify-content: center; font-size: 12px; }
+            .tab-btn { padding: 10px 12px; font-size: 12px; }
+            .tab-btn i { font-size: 14px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .stat-card { padding: 14px 12px; }
+            .stat-card .stat-value { font-size: 18px; }
+            .form-row { grid-template-columns: 1fr; }
+            .restore-options { grid-template-columns: 1fr; }
+            .modal { padding: 20px 16px; }
+            .product-grid { grid-template-columns: repeat(2, 1fr); }
+            .card-item { padding: 14px 16px; }
+        }
+
+        @media (max-width: 400px) {
+            .product-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { background: #fff !important; }
+            .app-header { position: static !important; box-shadow: none !important; }
+            .card-item { box-shadow: none !important; border: 1px solid #ddd !important; }
+        }
+
+        .text-center { text-align: center; }
+        .mt-8 { margin-top: 8px; }
+        .mt-16 { margin-top: 16px; }
+        .gap-8 { gap: 8px; }
+        .flex { display: flex; }
+        .flex-wrap { flex-wrap: wrap; }
+        .items-center { align-items: center; }
+        .hidden { display: none !important; }
+        
+        .customer-name-link {
+            color: var(--secondary);
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .customer-name-link:hover {
+            color: var(--accent);
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="app-header no-print">
+        <div class="header-inner">
+            <div class="brand">
+                <div class="brand-icon">ك</div>
+                <div class="brand-text">
+                    <h1>كشكولي</h1>
+                    <span>محمد فارس · محل الملابس</span>
+                </div>
+            </div>
+            <div class="header-status">
+                <span class="sync-label" id="syncStatusLabel">
+                    <i class="fas fa-circle" style="color:var(--success);font-size:10px;"></i>
+                    محفوظ
+                </span>
+                <span style="font-size:12px;opacity:0.6;" id="lastSyncTime"></span>
+            </div>
+        </div>
+    </header>
+
+    <nav class="tab-nav no-print">
+        <button class="tab-btn active" data-tab="dashboard"><i class="fas fa-chart-pie"></i> الرئيسية</button>
+        <button class="tab-btn" data-tab="customers"><i class="fas fa-users"></i> العملاء</button>
+        <button class="tab-btn" data-tab="invoices"><i class="fas fa-file-invoice"></i> الفواتير</button>
+        <button class="tab-btn" data-tab="products"><i class="fas fa-boxes"></i> المخزون</button>
+        <button class="tab-btn" data-tab="tasks"><i class="fas fa-tasks"></i> المهام</button>
+        <button class="tab-btn" data-tab="archive"><i class="fas fa-archive"></i> الأرشيف</button>
+        <button class="tab-btn" data-tab="settings"><i class="fas fa-cog"></i> الإعدادات</button>
+    </nav>
+
+    <main class="main-content">
+
+        <section class="tab-panel active" id="tab-dashboard">
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card"><i class="fas fa-users stat-icon"></i><span class="stat-label">العملاء</span><span class="stat-value" id="statCustomers">0</span></div>
+                <div class="stat-card accent"><i class="fas fa-coins stat-icon"></i><span class="stat-label">المستحقات</span><span class="stat-value" id="statBalance">0</span></div>
+                <div class="stat-card success"><i class="fas fa-chart-line stat-icon"></i><span class="stat-label">مبيعات اليوم</span><span class="stat-value" id="statSalesToday">0</span></div>
+                <div class="stat-card warning"><i class="fas fa-hand-holding-usd stat-icon"></i><span class="stat-label">مدفوعات اليوم</span><span class="stat-value" id="statPaymentsToday">0</span></div>
+                <div class="stat-card"><i class="fas fa-box stat-icon"></i><span class="stat-label">المنتجات</span><span class="stat-value" id="statProducts">0</span></div>
+                <div class="stat-card accent"><i class="fas fa-clock stat-icon"></i><span class="stat-label">مهام متبقية</span><span class="stat-value" id="statTasks">0</span></div>
+            </div>
+
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="globalSearch" placeholder="بحث عن عميل بالاسم أو الهاتف أو المكان...">
+            </div>
+            <div class="search-results" id="searchResults"></div>
+
+            <div class="section-header" style="margin-top:24px;">
+                <h2><i class="fas fa-calendar-day"></i> عمليات اليوم</h2>
+            </div>
+            <div class="card-list" id="todayOperations"></div>
+        </section>
+
+        <section class="tab-panel" id="tab-customers">
+            <div class="section-header">
+                <h2><i class="fas fa-users"></i> العملاء</h2>
+                <button class="btn btn-primary" onclick="showAddCustomer()"><i class="fas fa-plus"></i> إضافة عميل</button>
+            </div>
+            <div class="card-list" id="customersList"></div>
+        </section>
+
+        <section class="tab-panel" id="tab-invoices">
+            <div class="section-header">
+                <h2><i class="fas fa-file-invoice"></i> الفواتير</h2>
+            </div>
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="invoiceSearch" placeholder="بحث برقم الفاتورة أو اسم العميل...">
+            </div>
+            <div class="card-list" id="invoicesList"></div>
+        </section>
+
+        <section class="tab-panel" id="tab-products">
+            <div class="section-header">
+                <h2><i class="fas fa-boxes"></i> المخزون</h2>
+                <button class="btn btn-primary" onclick="showAddProduct()"><i class="fas fa-plus"></i> إضافة سلعة</button>
+            </div>
+            <div class="product-grid" id="productsList"></div>
+        </section>
+
+        <section class="tab-panel" id="tab-tasks">
+            <div class="section-header">
+                <h2><i class="fas fa-tasks"></i> المهام</h2>
+                <button class="btn btn-primary" onclick="showAddTask()"><i class="fas fa-plus"></i> إضافة مهمة</button>
+            </div>
+            <div id="tasksList"></div>
+        </section>
+
+        <section class="tab-panel" id="tab-archive">
+            <div class="section-header">
+                <h2><i class="fas fa-archive"></i> أرشيف العملاء</h2>
+            </div>
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="archiveSearch" placeholder="بحث في الأرشيف...">
+            </div>
+            <div class="card-list" id="archiveList"></div>
+        </section>
+
+        <section class="tab-panel" id="tab-settings">
+            <h2 style="font-size:20px;font-weight:700;color:var(--primary);margin-bottom:16px;"><i class="fas fa-cog" style="color:var(--accent);"></i> الإعدادات</h2>
+
+            <div class="settings-card">
+                <h3><i class="fab fa-telegram-plane"></i> Telegram Backup</h3>
+                <div class="form-group">
+                    <label>Bot Token</label>
+                    <input type="password" id="telegramToken" placeholder="أدخل توكن البوت" value="7144838322:AAEYLHsGFavk7BAlHqfcsV5XuXvOEadS6KA">
+                </div>
+                <div class="form-group">
+                    <label>Chat ID</label>
+                    <input type="text" id="telegramChatId" placeholder="أدخل معرف الدردشة" value="6113061454">
+                </div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <button class="btn btn-primary" onclick="saveTelegramSettings()"><i class="fas fa-save"></i> حفظ الإعدادات</button>
+                    <button class="btn btn-outline" onclick="testTelegram()"><i class="fas fa-check"></i> اختبار الاتصال</button>
+                </div>
+                <p style="margin-top:10px;font-size:13px;color:var(--text-light);">
+                    <i class="fas fa-info-circle"></i> سيتم إرسال نسخة احتياطية كاملة تلقائياً عند كل تغيير وعند عودة الاتصال بالإنترنت.
+                </p>
+            </div>
+
+            <div class="settings-card">
+                <h3><i class="fas fa-undo-alt"></i> استعادة البيانات</h3>
+                <div class="restore-options">
+                    <div class="restore-option">
+                        <h4><i class="fas fa-file-upload"></i> تحميل ملف</h4>
+                        <input type="file" id="restoreFile" accept=".json,.txt" style="width:100%;padding:8px 0;font-family:'Cairo',sans-serif;">
+                    </div>
+                    <div class="restore-option">
+                        <h4><i class="fas fa-paste"></i> لصق نص</h4>
+                        <textarea id="restoreText" rows="3" placeholder="الصق محتوى JSON أو TXT هنا..." style="width:100%;padding:8px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);font-family:'Cairo',sans-serif;font-size:13px;resize:vertical;"></textarea>
+                        <button class="btn btn-primary btn-sm" onclick="handleTextRestore()" style="margin-top:6px;"><i class="fas fa-search"></i> فحص البيانات</button>
+                    </div>
+                </div>
+                <div class="restore-preview" id="restorePreview"></div>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle"><i class="fas fa-pen"></i> النموذج</h2>
+                <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // ============================================================
+        // CONFIGURATION
+        // ============================================================
+        const CONFIG = {
+            TELEGRAM_TOKEN: '7144838322:AAEYLHsGFavk7BAlHqfcsV5XuXvOEadS6KA',
+            TELEGRAM_CHAT_ID: '6113061454',
+            DB_NAME: 'kashkoli',
+            DB_VERSION: 1
+        };
+
+        // ============================================================
+        // UTILITY FUNCTIONS
+        // ============================================================
+        function toast(msg, type = 'info') {
+            const c = document.getElementById('toastContainer');
+            if (!c) return;
+            const el = document.createElement('div');
+            el.className = `toast toast-${type}`;
+            const icons = { success: 'fa-check-circle', error: 'fa-times-circle', warning: 'fa-exclamation-triangle',
+                info: 'fa-info-circle' };
+            el.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i> ${msg}`;
+            c.appendChild(el);
+            setTimeout(() => el.remove(), 3500);
+        }
+
+        function showModal(title, html) {
+            document.getElementById('modalTitle').innerHTML = `<i class="fas fa-pen"></i> ${title}`;
+            document.getElementById('modalBody').innerHTML = html;
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        function formatCurrency(v) { return Number(v).toFixed(2) + ' جنيه'; }
+
+        function formatDate(d) {
+            const dt = new Date(d);
+            return dt.toLocaleDateString('ar-EG') + ' ' + dt.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function debounce(fn, ms = 300) {
+            let timer;
+            return function(...args) {
+                clearTimeout(timer);
+                timer = setTimeout(() => fn.apply(this, args), ms);
+            };
+        }
+
+        // ============================================================
+        // INDEXEDDB MANAGER
+        // ============================================================
+        class DB {
+            constructor() { this.db = null; }
+
+            open() {
+                return new Promise((resolve, reject) => {
+                    const req = indexedDB.open(CONFIG.DB_NAME, CONFIG.DB_VERSION);
+                    req.onerror = () => reject(req.error);
+                    req.onsuccess = () => { this.db = req.result;
+                        resolve(this.db); };
+                    req.onupgradeneeded = (e) => {
+                        const db = e.target.result;
+                        const stores = ['customers', 'transactions', 'invoices', 'products', 'tasks', 'settings',
+                            'pending'
+                        ];
+                        stores.forEach(s => {
+                            if (!db.objectStoreNames.contains(s)) {
+                                const store = db.createObjectStore(s, { keyPath: 'id', autoIncrement: true });
+                                if (s === 'customers') { store.createIndex('name', 'name');
+                                    store.createIndex('phone', 'phone');
+                                    store.createIndex('archived', 'archived'); }
+                                if (s === 'transactions') { store.createIndex('customerId', 'customerId');
+                                    store.createIndex('type', 'type');
+                                    store.createIndex('createdAt', 'createdAt'); }
+                                if (s === 'invoices') { store.createIndex('customerId', 'customerId');
+                                    store.createIndex('invoiceNumber', 'invoiceNumber');
+                                    store.createIndex('createdAt', 'createdAt'); }
+                                if (s === 'products') { store.createIndex('name', 'name'); }
+                                if (s === 'tasks') { store.createIndex('completed', 'completed'); }
+                            }
+                        });
+                    };
+                });
+            }
+
+            getAll(store) {
+                return new Promise((resolve, reject) => {
+                    const tx = this.db.transaction(store, 'readonly');
+                    const req = tx.objectStore(store).getAll();
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error);
+                });
+            }
+
+            get(store, id) {
+                return new Promise((resolve, reject) => {
+                    const tx = this.db.transaction(store, 'readonly');
+                    const req = tx.objectStore(store).get(id);
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error);
+                });
+            }
+
+            add(store, data) {
+                return new Promise((resolve, reject) => {
+                    const tx = this.db.transaction(store, 'readwrite');
+                    const req = tx.objectStore(store).add(data);
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error);
+                });
+            }
+
+            put(store, data) {
+                return new Promise((resolve, reject) => {
+                    const tx = this.db.transaction(store, 'readwrite');
+                    const req = tx.objectStore(store).put(data);
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error);
+                });
+            }
+
+            delete(store, id) {
+                return new Promise((resolve, reject) => {
+                    const tx = this.db.transaction(store, 'readwrite');
+                    const req = tx.objectStore(store).delete(id);
+                    req.onsuccess = () => resolve();
+                    req.onerror = () => reject(req.error);
+                });
+            }
+
+            clear(store) {
+                return new Promise((resolve, reject) => {
+                    const tx = this.db.transaction(store, 'readwrite');
+                    const req = tx.objectStore(store).clear();
+                    req.onsuccess = () => resolve();
+                    req.onerror = () => reject(req.error);
+                });
+            }
+
+            getByIndex(store, index, value) {
+                return new Promise((resolve, reject) => {
+                    const tx = this.db.transaction(store, 'readonly');
+                    const req = tx.objectStore(store).index(index).getAll(value);
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error);
+                });
+            }
+
+            count(store) {
+                return new Promise((resolve, reject) => {
+                    const tx = this.db.transaction(store, 'readonly');
+                    const req = tx.objectStore(store).count();
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error);
+                });
+            }
+        }
+
+        const db = new DB();
+
+        // ============================================================
+        // APP STATE
+        // ============================================================
+        let appReady = false;
+        let pendingChanges = [];
+        let isOnline = navigator.onLine;
+        let saleItems = [];
+
+        // ============================================================
+        // CORE FUNCTIONS
+        // ============================================================
+
+        function updateSyncStatus(status) {
+            const label = document.getElementById('syncStatusLabel');
+            const dot = label.querySelector('i');
+            const statusMap = {
+                synced: { icon: 'fa-circle', color: 'var(--success)', text: 'محفوظ' },
+                syncing: { icon: 'fa-spinner fa-spin', color: 'var(--warning)', text: 'جاري المزامنة' },
+                pending: { icon: 'fa-circle', color: 'var(--danger)', text: 'مزامنة معلقة' },
+                offline: { icon: 'fa-circle', color: '#636e72', text: 'غير متصل' }
+            };
+            const s = statusMap[status] || statusMap.synced;
+            dot.className = `fas ${s.icon}`;
+            dot.style.color = s.color;
+            label.innerHTML = `<i class="fas ${s.icon}" style="color:${s.color};font-size:10px;"></i> ${s.text}`;
+            document.getElementById('lastSyncTime').textContent = status === 'synced' ? '✓ ' + new Date().toLocaleTimeString(
+                'ar-EG') : '';
+        }
+
+        async function createFullBackup() {
+            const [customers, transactions, invoices, products, tasks, settings] = await Promise.all([
+                db.getAll('customers'),
+                db.getAll('transactions'),
+                db.getAll('invoices'),
+                db.getAll('products'),
+                db.getAll('tasks'),
+                db.getAll('settings')
+            ]);
+            return {
+                app: 'كشكولي',
+                version: '1.0.0',
+                user: 'محمد فارس',
+                exportedAt: new Date().toISOString(),
+                customers: customers || [],
+                transactions: transactions || [],
+                invoices: invoices || [],
+                products: products || [],
+                tasks: tasks || [],
+                settings: settings || []
+            };
+        }
+
+        function generateBackupFilename() {
+            const d = new Date();
+            const ds = d.toISOString().slice(0, 10).replace(/-/g, '');
+            const ts = d.toISOString().slice(11, 13) + d.toISOString().slice(14, 16);
+            return `kashkoli-sync-${ds}-${ts}`;
+        }
+
+        function createBackupText(backup) {
+            let txt = '================================\n';
+            txt += '        كشكولي\n';
+            txt += '     محل الملابس\n';
+            txt += '================================\n\n';
+            txt += `المستخدم: محمد فارس\n`;
+            txt += `تاريخ النسخة: ${new Date(backup.exportedAt).toLocaleString('ar-EG')}\n\n`;
+            txt += '--------------------------------\n';
+            txt += 'العملاء\n';
+            txt += '--------------------------------\n\n';
+            backup.customers.forEach(c => {
+                txt += `العميل: ${c.name}\n`;
+                if (c.phone) txt += `الهاتف: ${c.phone}\n`;
+                if (c.place) txt += `المكان: ${c.place}\n`;
+                txt += `الرصيد: ${(c.balance || 0).toFixed(2)} جنيه\n`;
+                txt += `الحالة: ${c.status || 'تم السداد'}\n`;
+                if (c.notes) txt += `ملاحظات: ${c.notes}\n`;
+                txt += '\n--------------------------------\n';
+            });
+            txt += '\n--------------------------------\n';
+            txt += 'العمليات\n';
+            txt += '--------------------------------\n\n';
+            backup.transactions.forEach(t => {
+                txt += `التاريخ: ${new Date(t.createdAt).toLocaleString('ar-EG')}\n`;
+                txt += `النوع: ${t.type === 'sale' ? 'بيع' : 'دفع'}\n`;
+                if (t.items && t.items.length) {
+                    txt += 'السلع:\n';
+                    t.items.forEach(item => {
+                        txt += `  - ${item.item} × ${item.quantity} = ${(item.price * item.quantity).toFixed(2)} جنيه\n`;
+                    });
+                }
+                txt += `المبلغ الإجمالي: ${t.amount.toFixed(2)} جنيه\n`;
+                if (t.payment) txt += `المدفوع: ${t.payment.toFixed(2)} جنيه\n`;
+                txt += `الرصيد بعد: ${t.balanceAfter.toFixed(2)} جنيه\n`;
+                if (t.notes) txt += `ملاحظات: ${t.notes}\n`;
+                txt += '\n--------------------------------\n';
+            });
+            txt += '\n================================\n';
+            txt += `عدد العملاء: ${backup.customers.length}\n`;
+            txt += `عدد العمليات: ${backup.transactions.length}\n`;
+            txt += `عدد الفواتير: ${backup.invoices.length}\n`;
+            txt += `عدد المنتجات: ${backup.products.length}\n`;
+            txt += `عدد المهام: ${backup.tasks.length}\n`;
+            txt += '================================\n';
+            return txt;
+        }
+
+        async function sendBackupToTelegram(backup) {
+            const token = CONFIG.TELEGRAM_TOKEN;
+            const chatId = CONFIG.TELEGRAM_CHAT_ID;
+            if (!token || !chatId) { console.warn('Telegram not configured'); return false; }
+
+            const filename = generateBackupFilename();
+            const jsonContent = JSON.stringify(backup, null, 2);
+            const txtContent = createBackupText(backup);
+            const caption =
+                `كشكولي\nنسخة احتياطية تلقائية\n\nالمستخدم: محمد فارس\nالتاريخ: ${new Date().toLocaleString('ar-EG')}\n\nالعملاء: ${backup.customers.length}\nالعمليات: ${backup.transactions.length}\nالفواتير: ${backup.invoices.length}\nالمنتجات: ${backup.products.length}\nالمهام: ${backup.tasks.length}`;
+
+            try {
+                const jsonBlob = new Blob([jsonContent], { type: 'application/json' });
+                const jsonForm = new FormData();
+                jsonForm.append('document', jsonBlob, `${filename}.json`);
+                jsonForm.append('chat_id', chatId);
+                jsonForm.append('caption', caption);
+                const r1 = await fetch(`https://api.telegram.org/bot${token}/sendDocument`, { method: 'POST', body: jsonForm });
+                const d1 = await r1.json();
+
+                const txtBlob = new Blob([txtContent], { type: 'text/plain' });
+                const txtForm = new FormData();
+                txtForm.append('document', txtBlob, `${filename}.txt`);
+                txtForm.append('chat_id', chatId);
+                const r2 = await fetch(`https://api.telegram.org/bot${token}/sendDocument`, { method: 'POST', body: txtForm });
+                const d2 = await r2.json();
+
+                return d1.ok && d2.ok;
+            } catch (e) { console.error('sendBackupToTelegram error:', e); return false; }
+        }
+
+        async function addPendingChange(type, data) {
+            try {
+                const entry = { type, data: JSON.stringify(data), createdAt: new Date().toISOString(), synced: false };
+                const id = await db.add('pending', entry);
+                pendingChanges.push({ id, ...entry, data: data });
+                updateSyncStatus('pending');
+                if (isOnline) await processPending();
+            } catch (e) { console.error('addPendingChange error:', e); }
+        }
+
+        async function processPending() {
+            if (!isOnline) { updateSyncStatus('offline'); return; }
+            if (pendingChanges.length === 0) { updateSyncStatus('synced'); return; }
+            updateSyncStatus('syncing');
+            try {
+                const backup = await createFullBackup();
+                const sent = await sendBackupToTelegram(backup);
+                if (sent) {
+                    for (const p of pendingChanges) await db.delete('pending', p.id);
+                    pendingChanges = [];
+                    updateSyncStatus('synced');
+                    toast('✓ تم إرسال النسخة الاحتياطية إلى Telegram', 'success');
+                } else { updateSyncStatus('pending'); }
+            } catch (e) { console.error('processPending error:', e);
+                updateSyncStatus('pending'); }
+        }
+
+        function startSyncService() {
+            setInterval(async () => {
+                if (isOnline && pendingChanges.length > 0) await processPending();
+            }, 30000);
+        }
+
+        // ---- Customer Functions ----
+        async function getCustomers(archived = false) {
+            const all = await db.getAll('customers');
+            return all.filter(c => c.archived === archived);
+        }
+
+        async function getCustomer(id) {
+            return await db.get('customers', id);
+        }
+
+        async function isNameExists(name, excludeId = null) {
+            const customers = await getCustomers(false);
+            return customers.some(c => c.name.trim().toLowerCase() === name.trim().toLowerCase() && c.id !== excludeId);
+        }
+
+        async function addCustomer(data) {
+            if (await isNameExists(data.name)) {
+                throw new Error('هذا الاسم موجود بالفعل. يرجى اختيار اسم مختلف.');
+            }
+            const customer = {
+                ...data,
+                balance: 0,
+                status: 'تم السداد',
+                archived: false,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            const id = await db.add('customers', customer);
+            customer.id = id;
+            await addPendingChange('add_customer', customer);
+            return customer;
+        }
+
+        async function updateCustomer(id, data) {
+            if (await isNameExists(data.name, id)) {
+                throw new Error('هذا الاسم موجود بالفعل. يرجى اختيار اسم مختلف.');
+            }
+            const customer = await getCustomer(id);
+            if (!customer) throw new Error('العميل غير موجود');
+            const updated = { ...customer, ...data, updatedAt: new Date().toISOString() };
+            await db.put('customers', updated);
+            await addPendingChange('update_customer', updated);
+            return updated;
+        }
+
+        async function archiveCustomer(id) {
+            const customer = await getCustomer(id);
+            if (!customer) throw new Error('العميل غير موجود');
+            customer.archived = true;
+            customer.updatedAt = new Date().toISOString();
+            await db.put('customers', customer);
+            await addPendingChange('archive_customer', customer);
+            return customer;
+        }
+
+        async function unarchiveCustomer(id) {
+            const customer = await getCustomer(id);
+            if (!customer) throw new Error('العميل غير موجود');
+            customer.archived = false;
+            customer.updatedAt = new Date().toISOString();
+            await db.put('customers', customer);
+            await addPendingChange('unarchive_customer', customer);
+            return customer;
+        }
+
+        async function deleteCustomer(id) {
+            const customer = await getCustomer(id);
+            if (!customer) throw new Error('العميل غير موجود');
+            await db.delete('customers', id);
+            await addPendingChange('delete_customer', { id });
+            return customer;
+        }
+
+        async function getCustomerBalance(id) {
+            const tx = await db.getByIndex('transactions', 'customerId', id);
+            return tx.reduce((sum, t) => {
+                if (t.type === 'sale') return sum + t.amount - (t.payment || 0);
+                if (t.type === 'payment') return sum - t.amount;
+                return sum;
+            }, 0);
+        }
+
+        async function getCustomerTransactions(id, filter = 'all') {
+            let tx = await db.getByIndex('transactions', 'customerId', id);
+            tx = tx.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            if (filter === 'today') {
+                const d = new Date().toDateString();
+                tx = tx.filter(t => new Date(t.createdAt).toDateString() === d);
+            } else if (filter === 'week') {
+                const w = new Date();
+                w.setDate(w.getDate() - 7);
+                tx = tx.filter(t => new Date(t.createdAt) >= w);
+            } else if (filter === 'month') {
+                const m = new Date();
+                m.setMonth(m.getMonth() - 1);
+                tx = tx.filter(t => new Date(t.createdAt) >= m);
+            }
+            return tx;
+        }
+
+        async function getCustomerName(id) {
+            const customer = await getCustomer(id);
+            return customer ? customer.name : '#' + id;
+        }
+
+        // ---- Transaction Functions ----
+        async function addTransaction(data) {
+            const customer = await getCustomer(data.customerId);
+            if (!customer) throw new Error('العميل غير موجود');
+
+            const currentBalance = await getCustomerBalance(data.customerId);
+
+            let totalAmount = 0;
+            if (data.items && data.items.length) {
+                totalAmount = data.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            } else {
+                totalAmount = data.amount || 0;
+            }
+
+            const tx = {
+                customerId: data.customerId,
+                type: data.type,
+                amount: totalAmount,
+                payment: data.payment || 0,
+                balanceBefore: currentBalance,
+                balanceAfter: currentBalance,
+                items: data.items || [{ item: data.item || 'سلعة', quantity: data.quantity || 1, price: totalAmount }],
+                notes: data.notes || '',
+                invoiceId: data.invoiceId || null,
+                createdAt: new Date().toISOString()
+            };
+
+            if (data.type === 'sale') {
+                tx.balanceAfter = currentBalance + totalAmount - (data.payment || 0);
+            } else if (data.type === 'payment') {
+                tx.balanceAfter = currentBalance - totalAmount;
+            }
+
+            const id = await db.add('transactions', tx);
+            tx.id = id;
+
+            await updateCustomerBalance(data.customerId);
+
+            if (data.type === 'sale' && data.createInvoice !== false) {
+                const inv = await createInvoice(data.customerId, tx);
+                tx.invoiceId = inv.id;
+                await db.put('transactions', tx);
+            }
+
+            await addPendingChange('add_transaction', tx);
+            return tx;
+        }
+
+        async function updateCustomerBalance(customerId) {
+            const balance = await getCustomerBalance(customerId);
+            const customer = await getCustomer(customerId);
+            if (!customer) return;
+            customer.balance = balance;
+            customer.status = balance > 0 ? 'عليه مبلغ' : 'تم السداد';
+            customer.updatedAt = new Date().toISOString();
+            await db.put('customers', customer);
+            return balance;
+        }
+
+        async function deleteTransaction(id) {
+            const tx = await db.get('transactions', id);
+            if (!tx) throw new Error('العملية غير موجودة');
+            await db.delete('transactions', id);
+            await updateCustomerBalance(tx.customerId);
+            await addPendingChange('delete_transaction', { id });
+        }
+
+        // ---- Invoice Functions ----
+        async function createInvoice(customerId, transaction) {
+            const customer = await getCustomer(customerId);
+            if (!customer) throw new Error('العميل غير موجود');
+
+            const d = new Date();
+            const ds = d.toISOString().slice(0, 10).replace(/-/g, '');
+            const count = await db.count('invoices');
+            const invoiceNumber = `INV-${ds}-${String(count + 1).padStart(4, '0')}`;
+
+            const invoice = {
+                customerId: customer.id,
+                customerName: customer.name,
+                customerPhone: customer.phone || '',
+                customerPlace: customer.place || '',
+                invoiceNumber,
+                items: transaction.items || [{ item: 'سلعة', quantity: 1, price: transaction.amount }],
+                total: transaction.amount,
+                paid: transaction.payment || 0,
+                balance: transaction.amount - (transaction.payment || 0),
+                status: transaction.payment >= transaction.amount ? 'مدفوعة' :
+                    (transaction.payment > 0 ? 'مدفوعة جزئياً' : 'غير مدفوعة'),
+                createdAt: new Date().toISOString(),
+                transactionId: transaction.id
+            };
+
+            const id = await db.add('invoices', invoice);
+            invoice.id = id;
+            await addPendingChange('add_invoice', invoice);
+            return invoice;
+        }
+
+        async function getInvoices() { return await db.getAll('invoices'); }
+
+        async function getInvoice(id) { return await db.get('invoices', id); }
+
+        async function searchInvoices(query) {
+            const all = await getInvoices();
+            if (!query) return all;
+            const q = query.toLowerCase();
+            return all.filter(i =>
+                i.invoiceNumber.toLowerCase().includes(q) ||
+                i.customerName.toLowerCase().includes(q) ||
+                i.items.some(item => item.item.toLowerCase().includes(q))
+            );
+        }
+
+        // ---- Product Functions ----
+        async function getProducts() { return await db.getAll('products'); }
+
+        async function getProduct(id) { return await db.get('products', id); }
+
+        async function addProduct(data) {
+            const product = { ...data, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+            const id = await db.add('products', product);
+            product.id = id;
+            await addPendingChange('add_product', product);
+            return product;
+        }
+
+        async function updateProduct(id, data) {
+            const product = await getProduct(id);
+            if (!product) throw new Error('المنتج غير موجود');
+            const updated = { ...product, ...data, updatedAt: new Date().toISOString() };
+            await db.put('products', updated);
+            await addPendingChange('update_product', updated);
+            return updated;
+        }
+
+        async function deleteProduct(id) {
+            await db.delete('products', id);
+            await addPendingChange('delete_product', { id });
+        }
+
+        async function updateProductStock(items) {
+            let success = true;
+            for (const item of items) {
+                const products = await getProducts();
+                const product = products.find(p => p.name === item.item);
+                if (!product) continue;
+                const newQty = product.quantity - (item.quantity || 1);
+                if (newQty < 0) {
+                    toast(`❌ المخزون غير كافٍ لـ ${item.item}`, 'error');
+                    success = false;
+                    continue;
+                }
+                await updateProduct(product.id, { quantity: newQty });
+                if (newQty <= 5 && newQty > 0) toast(`⚠️ المخزون منخفض: ${item.item} (${newQty})`, 'warning');
+                if (newQty === 0) toast(`❌ نفد المخزون: ${item.item}`, 'error');
+            }
+            return success;
+        }
+
+        // ---- Task Functions ----
+        async function getTasks() { return await db.getAll('tasks'); }
+
+        async function getTask(id) { return await db.get('tasks', id); }
+
+        async function addTask(data) {
+            const task = { ...data, completed: false, createdAt: new Date().toISOString(), updatedAt: new Date()
+                    .toISOString() };
+            const id = await db.add('tasks', task);
+            task.id = id;
+            await addPendingChange('add_task', task);
+            return task;
+        }
+
+        async function updateTask(id, data) {
+            const task = await getTask(id);
+            if (!task) throw new Error('المهمة غير موجودة');
+            const updated = { ...task, ...data, updatedAt: new Date().toISOString() };
+            await db.put('tasks', updated);
+            await addPendingChange('update_task', updated);
+            return updated;
+        }
+
+        async function deleteTask(id) {
+            await db.delete('tasks', id);
+            await addPendingChange('delete_task', { id });
+        }
+
+        async function toggleTask(id) {
+            const task = await getTask(id);
+            if (!task) throw new Error('المهمة غير موجودة');
+            task.completed = !task.completed;
+            task.updatedAt = new Date().toISOString();
+            await db.put('tasks', task);
+            await addPendingChange('update_task', task);
+            return task;
+        }
+
+        // ---- Restore Functions ----
+        async function validateBackup(data) {
+            try {
+                let backup = data;
+                if (typeof data === 'string') {
+                    try { backup = JSON.parse(data); } catch { backup = parseTxtBackup(data); }
+                }
+                if (!backup.app || !backup.version || !backup.exportedAt) throw new Error('تنسيق غير صحيح');
+                const required = ['customers', 'transactions', 'invoices', 'products', 'tasks'];
+                for (const f of required) {
+                    if (!Array.isArray(backup[f])) throw new Error(`حقل ${f} غير موجود`);
+                }
+                return {
+                    valid: true,
+                    backup,
+                    stats: {
+                        customers: backup.customers.length,
+                        transactions: backup.transactions.length,
+                        invoices: backup.invoices.length,
+                        products: backup.products.length,
+                        tasks: backup.tasks.length,
+                        exportedAt: backup.exportedAt
+                    }
+                };
+            } catch (e) { return { valid: false, error: e.message }; }
+        }
+
+        function parseTxtBackup(text) {
+            const backup = {
+                app: 'كشكولي',
+                version: '1.0.0',
+                user: 'محمد فارس',
+                exportedAt: new Date().toISOString(),
+                customers: [],
+                transactions: [],
+                invoices: [],
+                products: [],
+                tasks: []
+            };
+            const lines = text.split('\n');
+            let current = null;
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (trimmed.startsWith('العميل:')) {
+                    if (current) backup.customers.push(current);
+                    current = { name: trimmed.replace('العميل:', '').trim(), balance: 0 };
+                } else if (trimmed.startsWith('الهاتف:') && current) {
+                    current.phone = trimmed.replace('الهاتف:', '').trim();
+                } else if (trimmed.startsWith('المكان:') && current) {
+                    current.place = trimmed.replace('المكان:', '').trim();
+                } else if (trimmed.startsWith('الرصيد:') && current) {
+                    const val = trimmed.replace('الرصيد:', '').replace('جنيه', '').trim();
+                    current.balance = parseFloat(val) || 0;
+                }
+            }
+            if (current) backup.customers.push(current);
+            return backup;
+        }
+
+        async function restoreBackup(backup, mode = 'replace') {
+            try {
+                if (mode === 'replace') {
+                    await db.clear('customers');
+                    await db.clear('transactions');
+                    await db.clear('invoices');
+                    await db.clear('products');
+                    await db.clear('tasks');
+                    await db.clear('pending');
+                    for (const c of backup.customers) await db.add('customers', c);
+                    for (const t of backup.transactions) await db.add('transactions', t);
+                    for (const i of backup.invoices) await db.add('invoices', i);
+                    for (const p of backup.products) await db.add('products', p);
+                    for (const t of backup.tasks) await db.add('tasks', t);
+                    toast('✓ تم استبدال البيانات بنجاح', 'success');
+                } else if (mode === 'merge') {
+                    const mergeStore = async (store, items) => {
+                        const existing = await db.getAll(store);
+                        const ids = new Set(existing.map(i => i.id));
+                        for (const item of items) {
+                            if (!ids.has(item.id)) { await db.add(store, item); }
+                        }
+                    };
+                    await mergeStore('customers', backup.customers);
+                    await mergeStore('transactions', backup.transactions);
+                    await mergeStore('invoices', backup.invoices);
+                    await mergeStore('products', backup.products);
+                    await mergeStore('tasks', backup.tasks);
+                    toast('✓ تم دمج البيانات بنجاح', 'success');
+                }
+                pendingChanges = [];
+                await refreshAll();
+            } catch (e) { toast('❌ خطأ في استعادة البيانات', 'error');
+                console.error(e); }
+        }
+
+        // ---- Render Functions ----
+        async function refreshAll() {
+            await updateStats();
+            await renderCustomers();
+            await renderInvoices();
+            await renderProducts();
+            await renderTasks();
+            await renderArchive();
+            await renderTodayOperations();
+        }
+
+        async function updateStats() {
+            const [customers, transactions, products, tasks] = await Promise.all([
+                getCustomers(false),
+                db.getAll('transactions'),
+                getProducts(),
+                getTasks()
+            ]);
+
+            const totalBalance = customers.reduce((s, c) => s + (c.balance || 0), 0);
+            const today = new Date().toDateString();
+            const todaySales = transactions.filter(t =>
+                t.type === 'sale' && new Date(t.createdAt).toDateString() === today
+            ).reduce((s, t) => s + t.amount, 0);
+            const todayPayments = transactions.filter(t =>
+                t.type === 'payment' && new Date(t.createdAt).toDateString() === today
+            ).reduce((s, t) => s + t.amount, 0);
+
+            document.getElementById('statCustomers').textContent = customers.length;
+            document.getElementById('statBalance').textContent = formatCurrency(totalBalance);
+            document.getElementById('statSalesToday').textContent = formatCurrency(todaySales);
+            document.getElementById('statPaymentsToday').textContent = formatCurrency(todayPayments);
+            document.getElementById('statProducts').textContent = products.length;
+            document.getElementById('statTasks').textContent = tasks.filter(t => !t.completed).length;
+        }
+
+        async function renderCustomers() {
+            const container = document.getElementById('customersList');
+            const customers = await getCustomers(false);
+            if (!customers.length) {
+                container.innerHTML =
+                    `<div class="empty-state"><i class="fas fa-users"></i><h3>لا يوجد عملاء</h3><p>أضف عميلاً جديداً للبدء</p></div>`;
+                return;
+            }
+            container.innerHTML = customers.map(c => {
+                const bal = c.balance || 0;
+                const statusClass = bal > 0 ? 'balance-positive' : 'balance-zero';
+                const badge = bal > 0 ?
+                    `<span class="badge badge-danger">عليه مبلغ</span>` :
+                    `<span class="badge badge-success">تم السداد</span>`;
+                return `
+                    <div class="card-item" onclick="showCustomerDetail(${c.id})">
+                        <div class="card-header">
+                            <div class="card-title"><i class="fas fa-user"></i> ${c.name}</div>
+                            ${badge}
+                        </div>
+                        <div class="card-meta">
+                            ${c.phone ? `<span><i class="fas fa-phone"></i> ${c.phone}</span>` : ''}
+                            ${c.place ? `<span><i class="fas fa-map-marker-alt"></i> ${c.place}</span>` : ''}
+                            <span><i class="fas fa-calendar"></i> ${formatDate(c.updatedAt)}</span>
+                        </div>
+                        <div class="${statusClass}" style="margin-top:4px;">الرصيد: ${formatCurrency(bal)}</div>
+                        <div class="card-actions" onclick="event.stopPropagation()">
+                            <button class="btn btn-primary btn-sm" onclick="showCustomerDetail(${c.id})"><i class="fas fa-eye"></i> فتح</button>
+                            <button class="btn btn-success btn-sm" onclick="showAddSale(${c.id})"><i class="fas fa-shopping-cart"></i> بيع</button>
+                            <button class="btn btn-warning btn-sm" onclick="showAddPayment(${c.id})"><i class="fas fa-hand-holding-usd"></i> دفع</button>
+                            <button class="btn btn-outline btn-sm" onclick="showCustomerInvoices(${c.id})"><i class="fas fa-file-invoice"></i> فواتير</button>
+                            <button class="btn btn-outline btn-sm" onclick="editCustomer(${c.id})"><i class="fas fa-edit"></i> تعديل</button>
+                            <button class="btn btn-danger btn-sm" onclick="confirmDeleteCustomer(${c.id})"><i class="fas fa-trash"></i> حذف</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function renderInvoices() {
+            const container = document.getElementById('invoicesList');
+            const invoices = await getInvoices();
+            if (!invoices.length) {
+                container.innerHTML =
+                    `<div class="empty-state"><i class="fas fa-file-invoice"></i><h3>لا توجد فواتير</h3><p>قم بإنشاء فاتورة جديدة من خلال عملية بيع</p></div>`;
+                return;
+            }
+            container.innerHTML = invoices.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map(i => {
+                const statusClass = i.status === 'مدفوعة' ? 'badge-success' :
+                    i.status === 'مدفوعة جزئياً' ? 'badge-warning' : 'badge-danger';
+                return `
+                    <div class="card-item" onclick="showInvoiceDetail(${i.id})">
+                        <div class="card-header">
+                            <div class="card-title"><i class="fas fa-file-invoice"></i> ${i.invoiceNumber}</div>
+                            <span class="badge ${statusClass}">${i.status}</span>
+                        </div>
+                        <div class="card-meta">
+                            <span><i class="fas fa-user"></i> ${i.customerName}</span>
+                            <span><i class="fas fa-calendar"></i> ${formatDate(i.createdAt)}</span>
+                            <span><i class="fas fa-coins"></i> ${formatCurrency(i.total)}</span>
+                            <span><i class="fas fa-check-circle"></i> مدفوع: ${formatCurrency(i.paid)}</span>
+                            <span><i class="fas fa-times-circle"></i> متبقي: ${formatCurrency(i.balance)}</span>
+                        </div>
+                        <div class="card-actions" onclick="event.stopPropagation()">
+                            <button class="btn btn-primary btn-sm" onclick="showInvoiceDetail(${i.id})"><i class="fas fa-eye"></i> عرض</button>
+                            <button class="btn btn-outline btn-sm" onclick="printInvoice(${i.id})"><i class="fas fa-print"></i> طباعة</button>
+                            <button class="btn btn-outline btn-sm" onclick="shareInvoice(${i.id})"><i class="fas fa-share-alt"></i> مشاركة</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function renderProducts() {
+            const container = document.getElementById('productsList');
+            const products = await getProducts();
+            if (!products.length) {
+                container.innerHTML =
+                    `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-boxes"></i><h3>لا توجد منتجات</h3><p>أضف منتجاً جديداً للمخزون</p></div>`;
+                return;
+            }
+            container.innerHTML = products.map(p => {
+                const stockClass = p.quantity === 0 ? 'stock-out' : p.quantity <= 5 ? 'stock-low' : 'stock-ok';
+                const stockLabel = p.quantity === 0 ? 'نفد المخزون' : p.quantity <= 5 ? 'مخزون منخفض' : 'متوفر';
+                return `
+                    <div class="product-card">
+                        <div class="product-name">${p.name}</div>
+                        <div class="product-detail">${p.type || 'غير محدد'}</div>
+                        <div class="product-detail"><i class="fas fa-tag"></i> ${formatCurrency(p.salePrice || 0)}</div>
+                        <div class="product-stock ${stockClass}">${p.quantity || 0} قطعة <span style="font-weight:400;font-size:12px;">(${stockLabel})</span></div>
+                        ${p.size ? `<div class="product-detail"><i class="fas fa-ruler"></i> ${p.size}</div>` : ''}
+                        ${p.color ? `<div class="product-detail"><i class="fas fa-palette"></i> ${p.color}</div>` : ''}
+                        <div class="card-actions" style="margin-top:8px;">
+                            <button class="btn btn-outline btn-sm" onclick="editProduct(${p.id})"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id})"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function renderTasks() {
+            const container = document.getElementById('tasksList');
+            const tasks = await getTasks();
+            if (!tasks.length) {
+                container.innerHTML =
+                    `<div class="empty-state"><i class="fas fa-tasks"></i><h3>لا توجد مهام</h3><p>أضف مهمة جديدة</p></div>`;
+                return;
+            }
+            const sorted = tasks.sort((a, b) => {
+                if (a.completed !== b.completed) return a.completed ? 1 : -1;
+                const order = { 'عاجلة': 0, 'مهمة': 1, 'عادية': 2 };
+                return (order[a.priority] || 2) - (order[b.priority] || 2);
+            });
+            container.innerHTML = sorted.map(t => {
+                const priorityClass = t.priority === 'عاجلة' ? 'priority-high' :
+                    t.priority === 'مهمة' ? 'priority-medium' : 'priority-low';
+                return `
+                    <div class="task-card ${t.completed ? 'completed' : ''} ${priorityClass}">
+                        <div class="task-info">
+                            <div class="task-title">
+                                ${t.title}
+                                <span class="badge ${t.priority === 'عاجلة' ? 'badge-danger' : t.priority === 'مهمة' ? 'badge-warning' : 'badge-secondary'}">${t.priority || 'عادية'}</span>
+                            </div>
+                            ${t.details ? `<div class="task-details">${t.details}</div>` : ''}
+                            <div class="task-details">
+                                ${t.date ? `<i class="fas fa-calendar"></i> ${new Date(t.date).toLocaleDateString('ar-EG')}` : ''}
+                                ${t.reminder ? ` <i class="fas fa-clock"></i> ${t.reminder}` : ''}
+                                ${t.completed ? ' ✓ مكتملة' : ''}
+                            </div>
+                        </div>
+                        <div class="task-actions">
+                            <button class="btn ${t.completed ? 'btn-warning' : 'btn-success'} btn-sm" onclick="toggleTask(${t.id})">
+                                <i class="fas ${t.completed ? 'fa-undo' : 'fa-check'}"></i>
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="editTask(${t.id})"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteTask(${t.id})"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function renderArchive() {
+            const container = document.getElementById('archiveList');
+            const customers = await getCustomers(true);
+            if (!customers.length) {
+                container.innerHTML =
+                    `<div class="empty-state"><i class="fas fa-archive"></i><h3>لا يوجد عملاء مؤرشفين</h3></div>`;
+                return;
+            }
+            container.innerHTML = customers.map(c => `
+                <div class="card-item" onclick="showCustomerDetail(${c.id})">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fas fa-user"></i> ${c.name}</div>
+                        <span class="badge badge-secondary">مؤرشف</span>
+                    </div>
+                    <div class="card-meta">
+                        ${c.phone ? `<span><i class="fas fa-phone"></i> ${c.phone}</span>` : ''}
+                        ${c.place ? `<span><i class="fas fa-map-marker-alt"></i> ${c.place}</span>` : ''}
+                    </div>
+                    <div class="card-actions" onclick="event.stopPropagation()">
+                        <button class="btn btn-primary btn-sm" onclick="showCustomerDetail(${c.id})"><i class="fas fa-eye"></i> عرض</button>
+                        <button class="btn btn-success btn-sm" onclick="unarchiveCustomer(${c.id})"><i class="fas fa-undo"></i> إعادة</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function renderTodayOperations() {
+            const container = document.getElementById('todayOperations');
+            const today = new Date().toDateString();
+            const all = await db.getAll('transactions');
+            const todayTx = all.filter(t => new Date(t.createdAt).toDateString() === today)
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            if (!todayTx.length) {
+                container.innerHTML =
+                    `<div class="empty-state" style="padding:20px;"><i class="fas fa-calendar-day"></i><h3>لا توجد عمليات اليوم</h3></div>`;
+                return;
+            }
+
+            // Get customer names
+            const customerIds = [...new Set(todayTx.map(t => t.customerId))];
+            const customerNames = {};
+            for (const id of customerIds) {
+                customerNames[id] = await getCustomerName(id);
+            }
+
+            container.innerHTML = todayTx.map(t => {
+                const itemsStr = t.items ? t.items.map(i => `${i.item}×${i.quantity}`).join(' + ') : '';
+                const customerName = customerNames[t.customerId] || '#' + t.customerId;
+                return `
+                    <div class="card-item" style="border-right-color:${t.type === 'sale' ? 'var(--accent)' : 'var(--success)'};">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fas ${t.type === 'sale' ? 'fa-shopping-cart' : 'fa-hand-holding-usd'}"></i>
+                                ${t.type === 'sale' ? 'بيع' : 'دفع'}
+                                ${itemsStr ? ` - ${itemsStr}` : ''}
+                            </div>
+                            <span style="font-size:13px;color:var(--text-light);">${new Date(t.createdAt).toLocaleTimeString('ar-EG')}</span>
+                        </div>
+                        <div class="card-meta">
+                            <span><i class="fas fa-user"></i> ${customerName}</span>
+                            <span><i class="fas fa-coins"></i> ${formatCurrency(t.amount)}</span>
+                            ${t.payment ? `<span><i class="fas fa-check-circle"></i> مدفوع: ${formatCurrency(t.payment)}</span>` : ''}
+                            <span><i class="fas fa-balance-scale"></i> الرصيد: ${formatCurrency(t.balanceAfter)}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ============================================================
+        // UI EVENT HANDLERS
+        // ============================================================
+
+        async function showCustomerDetail(id) {
+            const customer = await getCustomer(id);
+            if (!customer) { toast('❌ العميل غير موجود', 'error'); return; }
+
+            const balance = await getCustomerBalance(id);
+            const tx = await getCustomerTransactions(id);
+            const stats = {
+                sales: tx.filter(t => t.type === 'sale').reduce((s, t) => s + t.amount, 0),
+                payments: tx.filter(t => t.type === 'payment').reduce((s, t) => s + t.amount, 0),
+                count: tx.length,
+                invoices: tx.filter(t => t.invoiceId).length
+            };
+
+            const html = `
+                <div style="margin-bottom:16px;">
+                    <div style="font-size:22px;font-weight:800;color:var(--primary);">${customer.name}</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--text-light);font-size:14px;">
+                        ${customer.phone ? `<span><i class="fas fa-phone"></i> ${customer.phone}</span>` : ''}
+                        ${customer.place ? `<span><i class="fas fa-map-marker-alt"></i> ${customer.place}</span>` : ''}
+                        ${customer.notes ? `<span><i class="fas fa-sticky-note"></i> ${customer.notes}</span>` : ''}
+                    </div>
+                    <div style="font-size:26px;font-weight:800;margin:8px 0;color:${balance>0?'var(--danger)':'var(--success)'}">
+                        ${formatCurrency(balance)}
+                        <span style="font-size:14px;font-weight:400;color:var(--text-light);">${balance>0?'مستحق':'تم السداد'}</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;margin:12px 0;">
+                        <div style="background:var(--bg);padding:10px;border-radius:var(--radius-sm);text-align:center;">
+                            <div style="font-weight:700;font-size:18px;">${formatCurrency(stats.sales)}</div>
+                            <div style="font-size:12px;color:var(--text-light);">المبيعات</div>
+                        </div>
+                        <div style="background:var(--bg);padding:10px;border-radius:var(--radius-sm);text-align:center;">
+                            <div style="font-weight:700;font-size:18px;">${formatCurrency(stats.payments)}</div>
+                            <div style="font-size:12px;color:var(--text-light);">المدفوعات</div>
+                        </div>
+                        <div style="background:var(--bg);padding:10px;border-radius:var(--radius-sm);text-align:center;">
+                            <div style="font-weight:700;font-size:18px;">${stats.count}</div>
+                            <div style="font-size:12px;color:var(--text-light);">العمليات</div>
+                        </div>
+                        <div style="background:var(--bg);padding:10px;border-radius:var(--radius-sm);text-align:center;">
+                            <div style="font-weight:700;font-size:18px;">${stats.invoices}</div>
+                            <div style="font-size:12px;color:var(--text-light);">الفواتير</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;">
+                        <button class="btn btn-success" onclick="closeModal();setTimeout(()=>showAddSale(${id}),100);"><i class="fas fa-shopping-cart"></i> بيع</button>
+                        <button class="btn btn-warning" onclick="showAddPayment(${id});closeModal();"><i class="fas fa-hand-holding-usd"></i> دفع</button>
+                        <button class="btn btn-outline" onclick="showCustomerTransactions(${id});closeModal();"><i class="fas fa-list"></i> العمليات</button>
+                        ${customer.archived ? `<button class="btn btn-success" onclick="unarchiveCustomer(${id});closeModal();refreshAll();"><i class="fas fa-undo"></i> إعادة</button>` : ''}
+                    </div>
+                </div>
+                <h4 style="margin-bottom:8px;"><i class="fas fa-history"></i> آخر العمليات</h4>
+                ${tx.slice(0,5).map(t => {
+                    const itemsStr = t.items ? t.items.map(i => `${i.item}×${i.quantity}`).join(' + ') : '';
+                    return `
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--bg);border-radius:var(--radius-sm);margin-bottom:4px;">
+                            <div>
+                                <span style="font-weight:600;color:${t.type==='sale'?'var(--accent)':'var(--success)'}">${t.type==='sale'?'💰 بيع':'💳 دفع'}</span>
+                                <span style="font-size:12px;color:var(--text-light);margin-right:8px;">${formatDate(t.createdAt)}</span>
+                                ${itemsStr ? `<span style="font-size:13px;color:var(--text-light);"> - ${itemsStr}</span>` : ''}
+                            </div>
+                            <div style="font-weight:700;color:${t.type==='sale'?'var(--accent)':'var(--success)'}">${formatCurrency(t.amount)}</div>
+                        </div>
+                    `;
+                }).join('')}
+                ${tx.length > 5 ? `<div style="text-align:center;color:var(--text-light);font-size:13px;">... وعرض ${tx.length - 5} عمليات أخرى</div>` : ''}
+            `;
+            showModal(`<i class="fas fa-user"></i> ${customer.name}`, html);
+        }
+
+        async function showCustomerTransactions(id) {
+            const customer = await getCustomer(id);
+            if (!customer) { toast('❌ العميل غير موجود', 'error'); return; }
+
+            let filter = 'all';
+            const renderTx = async (f) => {
+                filter = f;
+                const tx = await getCustomerTransactions(id, f);
+                const container = document.getElementById('txList');
+                if (!tx.length) {
+                    container.innerHTML =
+                        `<div class="empty-state"><i class="fas fa-list"></i><h3>لا توجد عمليات</h3></div>`;
+                    return;
+                }
+                container.innerHTML = tx.map(t => {
+                    const itemsStr = t.items ? t.items.map(i => `${i.item}×${i.quantity}`).join(' + ') : '';
+                    return `
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg);border-radius:var(--radius-sm);margin-bottom:4px;border-right:4px solid ${t.type==='sale'?'var(--accent)':'var(--success)'};">
+                            <div>
+                                <span style="font-weight:700;color:${t.type==='sale'?'var(--accent)':'var(--success)'}">${t.type==='sale'?'💰 بيع':'💳 دفع'}</span>
+                                <span style="font-size:12px;color:var(--text-light);margin-right:8px;">${formatDate(t.createdAt)}</span>
+                                ${itemsStr ? `<div style="font-size:13px;color:var(--text-light);">${itemsStr}</div>` : ''}
+                                ${t.notes ? `<div style="font-size:12px;color:var(--text-light);">${t.notes}</div>` : ''}
+                                <div style="font-size:12px;color:var(--text-light);">الرصيد قبل: ${formatCurrency(t.balanceBefore)} → بعد: ${formatCurrency(t.balanceAfter)}</div>
+                            </div>
+                            <div style="text-align:left;">
+                                <div style="font-weight:700;color:${t.type==='sale'?'var(--accent)':'var(--success)'}">${formatCurrency(t.amount)}</div>
+                                ${t.payment ? `<div style="font-size:12px;color:var(--text-light);">مدفوع: ${formatCurrency(t.payment)}</div>` : ''}
+                                <div style="display:flex;gap:4px;margin-top:4px;">
+                                    <button class="btn btn-outline btn-sm" onclick="editTransaction(${t.id})"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteTransaction(${t.id})"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            };
+
+            const html = `
+                <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;">
+                    <button class="btn btn-sm ${filter==='all'?'btn-primary':'btn-outline'}" onclick="renderTx('all')">الكل</button>
+                    <button class="btn btn-sm ${filter==='today'?'btn-primary':'btn-outline'}" onclick="renderTx('today')">اليوم</button>
+                    <button class="btn btn-sm ${filter==='week'?'btn-primary':'btn-outline'}" onclick="renderTx('week')">الأسبوع</button>
+                    <button class="btn btn-sm ${filter==='month'?'btn-primary':'btn-outline'}" onclick="renderTx('month')">الشهر</button>
+                </div>
+                <div id="txList"></div>
+            `;
+            showModal(`<i class="fas fa-list"></i> عمليات ${customer.name}`, html);
+            await renderTx('all');
+            window._renderTx = renderTx;
+        }
+
+        async function showCustomerInvoices(id) {
+            const customer = await getCustomer(id);
+            if (!customer) { toast('❌ العميل غير موجود', 'error'); return; }
+            const invoices = await getInvoices();
+            const filtered = invoices.filter(i => i.customerId === id);
+
+            if (!filtered.length) {
+                showModal(`<i class="fas fa-file-invoice"></i> فواتير ${customer.name}`,
+                    `<div class="empty-state"><i class="fas fa-file-invoice"></i><h3>لا توجد فواتير لهذا العميل</h3></div>`);
+                return;
+            }
+
+            const html = filtered.map(i => `
+                <div class="card-item" onclick="showInvoiceDetail(${i.id})">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fas fa-file-invoice"></i> ${i.invoiceNumber}</div>
+                        <span class="badge ${i.status==='مدفوعة'?'badge-success':i.status==='مدفوعة جزئياً'?'badge-warning':'badge-danger'}">${i.status}</span>
+                    </div>
+                    <div class="card-meta">
+                        <span><i class="fas fa-calendar"></i> ${formatDate(i.createdAt)}</span>
+                        <span><i class="fas fa-coins"></i> ${formatCurrency(i.total)}</span>
+                        <span><i class="fas fa-check-circle"></i> ${formatCurrency(i.paid)}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            showModal(`<i class="fas fa-file-invoice"></i> فواتير ${customer.name}`, html);
+        }
+
+        // ---- Edit Customer ----
+        async function editCustomer(id) {
+            const customer = await getCustomer(id);
+            if (!customer) { toast('❌ العميل غير موجود', 'error'); return; }
+
+            const html = `
+                <form onsubmit="handleEditCustomer(event, ${id})">
+                    <div class="form-group">
+                        <label>اسم العميل <span class="required">*</span></label>
+                        <input type="text" id="editCustName" value="${customer.name}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>رقم الهاتف</label>
+                        <input type="tel" id="editCustPhone" value="${customer.phone || ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>المكان</label>
+                        <input type="text" id="editCustPlace" value="${customer.place || ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>ملاحظات</label>
+                        <textarea id="editCustNotes">${customer.notes || ''}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;"><i class="fas fa-save"></i> حفظ التعديلات</button>
+                </form>
+            `;
+            showModal(`<i class="fas fa-edit"></i> تعديل بيانات ${customer.name}`, html);
+        }
+
+        async function handleEditCustomer(e, id) {
+            e.preventDefault();
+            const name = document.getElementById('editCustName').value.trim();
+            if (!name) { toast('❌ يرجى إدخال اسم العميل', 'error'); return; }
+
+            try {
+                await updateCustomer(id, {
+                    name,
+                    phone: document.getElementById('editCustPhone').value.trim(),
+                    place: document.getElementById('editCustPlace').value.trim(),
+                    notes: document.getElementById('editCustNotes').value.trim()
+                });
+                closeModal();
+                toast('✓ تم تعديل بيانات العميل بنجاح', 'success');
+                await refreshAll();
+            } catch (err) {
+                toast('❌ ' + err.message, 'error');
+            }
+        }
+
+        // ---- Delete Customer with confirmation ----
+        async function confirmDeleteCustomer(id) {
+            const customer = await getCustomer(id);
+            if (!customer) { toast('❌ العميل غير موجود', 'error'); return; }
+
+            const html = `
+                <div style="text-align:center;padding:10px 0;">
+                    <i class="fas fa-exclamation-triangle" style="font-size:48px;color:var(--danger);margin-bottom:16px;display:block;"></i>
+                    <h3 style="margin-bottom:8px;">هل أنت متأكد من حذف العميل؟</h3>
+                    <p style="color:var(--text-light);margin-bottom:4px;"><strong>${customer.name}</strong></p>
+                    <p style="color:var(--text-light);font-size:13px;">سيتم حذف جميع بيانات العميل بما في ذلك عملياته وفواتيره.</p>
+                    <p style="color:var(--danger);font-size:13px;font-weight:600;">⚠️ هذا الإجراء لا يمكن التراجع عنه!</p>
+                    <div style="display:flex;gap:10px;margin-top:20px;justify-content:center;">
+                        <button class="btn btn-danger" onclick="handleDeleteCustomer(${id})"><i class="fas fa-trash"></i> نعم، حذف</button>
+                        <button class="btn btn-outline" onclick="closeModal()">إلغاء</button>
+                    </div>
+                </div>
+            `;
+            showModal('⚠️ تأكيد الحذف', html);
+        }
+
+        async function handleDeleteCustomer(id) {
+            try {
+                await deleteCustomer(id);
+                closeModal();
+                toast('✓ تم حذف العميل بنجاح', 'success');
+                await refreshAll();
+            } catch (err) {
+                toast('❌ خطأ في حذف العميل', 'error');
+            }
+        }
+
+        // ---- Add Customer ----
+        function showAddCustomer() {
+            const html = `
+                <form onsubmit="handleAddCustomer(event)">
+                    <div class="form-group">
+                        <label>اسم العميل <span class="required">*</span></label>
+                        <input type="text" id="custName" required placeholder="أدخل اسم العميل">
+                    </div>
+                    <div class="form-group">
+                        <label>رقم الهاتف</label>
+                        <input type="tel" id="custPhone" placeholder="أدخل رقم الهاتف">
+                    </div>
+                    <div class="form-group">
+                        <label>المكان</label>
+                        <input type="text" id="custPlace" placeholder="أدخل المكان">
+                    </div>
+                    <div class="form-group">
+                        <label>ملاحظات</label>
+                        <textarea id="custNotes" placeholder="أي ملاحظات إضافية"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;"><i class="fas fa-save"></i> حفظ العميل</button>
+                </form>
+            `;
+            showModal('<i class="fas fa-user-plus"></i> إضافة عميل جديد', html);
+        }
+
+        async function handleAddCustomer(e) {
+            e.preventDefault();
+            const name = document.getElementById('custName').value.trim();
+            if (!name) { toast('❌ يرجى إدخال اسم العميل', 'error'); return; }
+
+            try {
+                await addCustomer({
+                    name,
+                    phone: document.getElementById('custPhone').value.trim(),
+                    place: document.getElementById('custPlace').value.trim(),
+                    notes: document.getElementById('custNotes').value.trim()
+                });
+                closeModal();
+                toast('✓ تم إضافة العميل بنجاح', 'success');
+                await refreshAll();
+            } catch (err) {
+                toast('❌ ' + err.message, 'error');
+            }
+        }
+
+        // ---- Add Sale ----
+        function showAddSale(customerId) {
+            saleItems = [];
+            renderSaleItems();
+
+            const html = `
+                <form onsubmit="handleAddSale(event, ${customerId})">
+                    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+                        <input type="text" id="newItemName" placeholder="اسم السلعة" style="flex:1;min-width:100px;padding:8px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);font-family:'Cairo',sans-serif;">
+                        <input type="number" id="newItemQty" placeholder="الكمية" value="1" min="1" style="width:70px;padding:8px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);font-family:'Cairo',sans-serif;text-align:center;">
+                        <input type="number" id="newItemPrice" placeholder="السعر" min="0.01" step="0.01" style="width:90px;padding:8px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);font-family:'Cairo',sans-serif;text-align:center;">
+                        <button type="button" class="add-item-btn" onclick="addSaleItem()"><i class="fas fa-plus"></i> إضافة</button>
+                    </div>
+
+                    <div class="items-list" id="saleItemsList">
+                        <div style="text-align:center;color:var(--text-light);font-size:13px;padding:8px;">أضف سلعاً للفاتورة</div>
+                    </div>
+
+                    <div class="total-amount-display" id="saleTotalDisplay">الإجمالي: 0.00 جنيه</div>
+
+                    <div class="form-group">
+                        <label>المدفوع</label>
+                        <input type="number" id="salePayment" min="0" step="0.01" placeholder="المبلغ المدفوع" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>ملاحظات</label>
+                        <textarea id="saleNotes" placeholder="أي ملاحظات"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success" style="width:100%;"><i class="fas fa-shopping-cart"></i> تسجيل البيع</button>
+                </form>
+            `;
+            showModal('<i class="fas fa-shopping-cart"></i> بيع جديد', html);
+            renderSaleItems();
+        }
+
+        function addSaleItem() {
+            const name = document.getElementById('newItemName').value.trim();
+            const qty = parseInt(document.getElementById('newItemQty').value) || 1;
+            const price = parseFloat(document.getElementById('newItemPrice').value) || 0;
+
+            if (!name) { toast('❌ يرجى إدخال اسم السلعة', 'warning'); return; }
+            if (price <= 0) { toast('❌ يرجى إدخال سعر صحيح', 'warning'); return; }
+
+            saleItems.push({ item: name, quantity: qty, price: price });
+            document.getElementById('newItemName').value = '';
+            document.getElementById('newItemQty').value = '1';
+            document.getElementById('newItemPrice').value = '';
+            renderSaleItems();
+        }
+
+        function removeSaleItem(index) {
+            saleItems.splice(index, 1);
+            renderSaleItems();
+        }
+
+        function renderSaleItems() {
+            const container = document.getElementById('saleItemsList');
+            const totalDisplay = document.getElementById('saleTotalDisplay');
+            if (!container) return;
+
+            if (saleItems.length === 0) {
+                container.innerHTML =
+                    `<div style="text-align:center;color:var(--text-light);font-size:13px;padding:8px;">أضف سلعاً للفاتورة</div>`;
+                if (totalDisplay) totalDisplay.textContent = 'الإجمالي: 0.00 جنيه';
+                return;
+            }
+
+            let total = 0;
+            container.innerHTML = saleItems.map((item, index) => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                return `
+                    <div class="item-entry">
+                        <span style="font-weight:600;flex:1;">${item.item}</span>
+                        <span style="font-size:13px;color:var(--text-light);">×${item.quantity}</span>
+                        <span style="font-weight:600;min-width:70px;text-align:center;">${formatCurrency(item.price)}</span>
+                        <span style="font-weight:700;color:var(--secondary);min-width:70px;text-align:center;">${formatCurrency(itemTotal)}</span>
+                        <button type="button" class="item-remove" onclick="removeSaleItem(${index})"><i class="fas fa-times"></i></button>
+                    </div>
+                `;
+            }).join('');
+
+            if (totalDisplay) {
+                totalDisplay.textContent = `الإجمالي: ${formatCurrency(total)}`;
+            }
+            window._saleTotal = total;
+        }
+
+        async function handleAddSale(e, customerId) {
+            e.preventDefault();
+
+            if (saleItems.length === 0) {
+                toast('❌ يرجى إضافة سلعة واحدة على الأقل', 'error');
+                return;
+            }
+
+            const payment = parseFloat(document.getElementById('salePayment').value) || 0;
+            const total = window._saleTotal || saleItems.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+
+            if (total <= 0) {
+                toast('❌ إجمالي المبلغ غير صحيح', 'error');
+                return;
+            }
+
+            try {
+                await updateProductStock(saleItems);
+
+                const tx = await addTransaction({
+                    customerId,
+                    type: 'sale',
+                    amount: total,
+                    payment: payment,
+                    items: saleItems,
+                    notes: document.getElementById('saleNotes').value.trim(),
+                    createInvoice: true
+                });
+
+                closeModal();
+                saleItems = [];
+                toast(`✓ تم تسجيل البيع ${formatCurrency(total)}`, 'success');
+                await refreshAll();
+
+                const bal = await getCustomerBalance(customerId);
+                if (bal === 0) {
+                    const c = await getCustomer(customerId);
+                    if (c && !c.archived) {
+                        setTimeout(() => {
+                            showModal('أرشفة العميل',
+                                `
+                                <p>تم سداد جميع مستحقات العميل <strong>${c.name}</strong></p>
+                                <p style="color:var(--text-light);">هل تريد أرشفته؟</p>
+                                <div style="display:flex;gap:10px;margin-top:16px;">
+                                    <button class="btn btn-primary" onclick="archiveCustomer(${c.id});closeModal();refreshAll();"><i class="fas fa-archive"></i> أرشفة</button>
+                                    <button class="btn btn-outline" onclick="closeModal()">لاحقاً</button>
+                                </div>
+                            `);
+                        }, 500);
+                    }
+                }
+            } catch (err) {
+                toast('❌ خطأ في تسجيل البيع', 'error');
+                console.error(err);
+            }
+        }
+
+        // ---- Add Payment ----
+        function showAddPayment(customerId) {
+            const html = `
+                <form onsubmit="handleAddPayment(event, ${customerId})">
+                    <div class="form-group">
+                        <label>المبلغ المدفوع <span class="required">*</span></label>
+                        <input type="number" id="paymentAmount" required min="0.01" step="0.01" placeholder="أدخل المبلغ">
+                    </div>
+                    <div class="form-group">
+                        <label>ملاحظات</label>
+                        <textarea id="paymentNotes" placeholder="أي ملاحظات"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-warning" style="width:100%;"><i class="fas fa-hand-holding-usd"></i> تسجيل الدفع</button>
+                </form>
+            `;
+            showModal('<i class="fas fa-hand-holding-usd"></i> دفعة جديدة', html);
+        }
+
+        async function handleAddPayment(e, customerId) {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('paymentAmount').value);
+            if (!amount || amount <= 0) { toast('❌ يرجى إدخال مبلغ صحيح', 'error'); return; }
+
+            try {
+                await addTransaction({
+                    customerId,
+                    type: 'payment',
+                    amount: amount,
+                    payment: amount,
+                    items: [{ item: 'دفعة نقدية', quantity: 1, price: amount }],
+                    notes: document.getElementById('paymentNotes').value.trim()
+                });
+                closeModal();
+                toast(`✓ تم تسجيل الدفعة ${formatCurrency(amount)}`, 'success');
+                await refreshAll();
+
+                const newBal = await getCustomerBalance(customerId);
+                if (newBal === 0) {
+                    const c = await getCustomer(customerId);
+                    if (c && !c.archived) {
+                        setTimeout(() => {
+                            showModal('أرشفة العميل',
+                                `
+                                <p>تم سداد جميع مستحقات العميل <strong>${c.name}</strong></p>
+                                <p style="color:var(--text-light);">هل تريد أرشفته؟</p>
+                                <div style="display:flex;gap:10px;margin-top:16px;">
+                                    <button class="btn btn-primary" onclick="archiveCustomer(${c.id});closeModal();refreshAll();"><i class="fas fa-archive"></i> أرشفة</button>
+                                    <button class="btn btn-outline" onclick="closeModal()">لاحقاً</button>
+                                </div>
+                            `);
+                        }, 500);
+                    }
+                }
+            } catch (err) { toast('❌ خطأ في تسجيل الدفع', 'error'); }
+        }
+
+        // ---- Edit / Delete Transaction ----
+        async function editTransaction(id) {
+            const tx = await db.get('transactions', id);
+            if (!tx) { toast('❌ العملية غير موجودة', 'error'); return; }
+
+            const itemsStr = tx.items ? tx.items.map(i => `${i.item}×${i.quantity}`).join(' + ') : '';
+
+            const html = `
+                <form onsubmit="handleEditTransaction(event, ${id})">
+                    <div class="form-group">
+                        <label>السلع</label>
+                        <div style="background:var(--bg);padding:8px 12px;border-radius:var(--radius-sm);">${itemsStr || 'غير محدد'}</div>
+                    </div>
+                    <div class="form-group">
+                        <label>المبلغ الإجمالي</label>
+                        <input type="number" id="editTxAmount" value="${tx.amount}" min="0.01" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>ملاحظات</label>
+                        <textarea id="editTxNotes">${tx.notes || ''}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;"><i class="fas fa-save"></i> حفظ التعديل</button>
+                </form>
+            `;
+            showModal('<i class="fas fa-edit"></i> تعديل العملية', html);
+        }
+
+        async function handleEditTransaction(e, id) {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('editTxAmount').value);
+            const notes = document.getElementById('editTxNotes').value.trim();
+            if (!amount || amount <= 0) { toast('❌ يرجى إدخال مبلغ صحيح', 'error'); return; }
+
+            try {
+                const tx = await db.get('transactions', id);
+                if (!tx) throw new Error('غير موجود');
+                tx.amount = amount;
+                tx.notes = notes;
+
+                const customerId = tx.customerId;
+                const allTx = await getCustomerTransactions(customerId);
+                let bal = 0;
+                for (const t of allTx) {
+                    if (t.id === id) {
+                        t.amount = amount;
+                        t.notes = notes;
+                    }
+                    if (t.type === 'sale') bal += t.amount - (t.payment || 0);
+                    if (t.type === 'payment') bal -= t.amount;
+                    t.balanceAfter = bal;
+                    await db.put('transactions', t);
+                }
+                await updateCustomerBalance(customerId);
+                await addPendingChange('update_transaction', tx);
+                closeModal();
+                toast('✓ تم تعديل العملية', 'success');
+                await refreshAll();
+            } catch (err) { toast('❌ خطأ في التعديل', 'error'); }
+        }
+
+        // ---- Invoice Detail ----
+        async function showInvoiceDetail(id) {
+            const invoice = await getInvoice(id);
+            if (!invoice) { toast('❌ الفاتورة غير موجودة', 'error'); return; }
+
+            const html = `
+                <div id="printArea" class="invoice-print">
+                    <div class="invoice-title">كشكولي</div>
+                    <div class="invoice-sub">محمد فارس · محل الملابس</div>
+
+                    <div class="invoice-customer">
+                        <p><strong>العميل:</strong> ${invoice.customerName}</p>
+                        ${invoice.customerPhone ? `<p><strong>الهاتف:</strong> ${invoice.customerPhone}</p>` : ''}
+                        ${invoice.customerPlace ? `<p><strong>المكان:</strong> ${invoice.customerPlace}</p>` : ''}
+                    </div>
+
+                    <p><strong>رقم الفاتورة:</strong> ${invoice.invoiceNumber}</p>
+                    <p><strong>التاريخ:</strong> ${formatDate(invoice.createdAt)}</p>
+
+                    <table>
+                        <thead>
+                            <tr><th>السلعة</th><th>الكمية</th><th>سعر الوحدة</th><th>الإجمالي</th></tr>
+                        </thead>
+                        <tbody>
+                            ${invoice.items.map(item => `
+                                <tr>
+                                    <td>${item.item}</td>
+                                    <td>${item.quantity}</td>
+                                    <td>${formatCurrency(item.price)}</td>
+                                    <td>${formatCurrency(item.price * item.quantity)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+
+                    <div class="invoice-totals">
+                        <p><strong>إجمالي الفاتورة:</strong> ${formatCurrency(invoice.total)}</p>
+                        <p><strong>المدفوع:</strong> ${formatCurrency(invoice.paid)}</p>
+                        <p><strong>المتبقي:</strong> ${formatCurrency(invoice.balance)}</p>
+                    </div>
+
+                    <div class="invoice-status" style="background:${invoice.status==='مدفوعة'?'var(--success)':invoice.status==='مدفوعة جزئياً'?'var(--warning)':'var(--danger)'};color:#fff;padding:8px;border-radius:var(--radius-sm);margin-top:12px;">
+                        حالة الفاتورة: ${invoice.status}
+                    </div>
+                </div>
+
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;">
+                    <button class="btn btn-primary" onclick="printInvoiceFromArea()"><i class="fas fa-print"></i> طباعة</button>
+                    <button class="btn btn-outline" onclick="saveInvoicePDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+                    <button class="btn btn-outline" onclick="shareInvoiceFromArea()"><i class="fas fa-share-alt"></i> مشاركة</button>
+                </div>
+            `;
+            showModal(`<i class="fas fa-file-invoice"></i> ${invoice.invoiceNumber}`, html);
+            window._currentInvoice = invoice;
+        }
+
+        function printInvoiceFromArea() {
+            const area = document.getElementById('printArea');
+            if (!area) { toast('❌ لا يمكن الطباعة', 'error'); return; }
+            const style = document.createElement('style');
+            style.innerHTML =
+                `@media print{body *{visibility:hidden!important}#printArea,#printArea *{visibility:visible!important}#printArea{position:absolute!important;left:0!important;top:0!important;width:100%!important;padding:20px!important;background:#fff!important;color:#000!important}}`;
+            document.head.appendChild(style);
+            window.print();
+            setTimeout(() => document.head.removeChild(style), 1000);
+        }
+
+        function saveInvoicePDF() {
+            const area = document.getElementById('printArea');
+            if (!area) { toast('❌ لا يمكن حفظ PDF', 'error'); return; }
+            const html =
+                `<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>فاتورة</title><style>body{font-family:'Cairo',sans-serif;padding:20px;}.invoice-print{max-width:800px;margin:0 auto;}</style></head><body>${area.outerHTML}</body></html>`;
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `فاتورة-${Date.now()}.html`;
+            a.click();
+            URL.revokeObjectURL(url);
+            toast('✓ تم حفظ الفاتورة', 'success');
+        }
+
+        async function shareInvoiceFromArea() {
+            const area = document.getElementById('printArea');
+            if (!area) { toast('❌ لا يمكن المشاركة', 'error'); return; }
+            const html =
+                `<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>فاتورة</title></head><body>${area.outerHTML}</body></html>`;
+            const blob = new Blob([html], { type: 'text/html' });
+            const file = new File([blob], `فاتورة-${Date.now()}.html`, { type: 'text/html' });
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title: 'فاتورة كشكولي', files: [file] });
+                    toast('✓ تمت المشاركة', 'success');
+                } catch (e) {
+                    if (e.name !== 'AbortError') { toast('❌ فشل المشاركة', 'error'); }
+                }
+            } else {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `فاتورة-${Date.now()}.html`;
+                a.click();
+                URL.revokeObjectURL(url);
+                toast('✓ تم حفظ الفاتورة', 'success');
+            }
+        }
+
+        function printInvoice(id) {
+            showInvoiceDetail(id);
+            setTimeout(printInvoiceFromArea, 500);
+        }
+
+        function shareInvoice(id) {
+            showInvoiceDetail(id);
+            setTimeout(shareInvoiceFromArea, 500);
+        }
+
+        // ---- Product CRUD ----
+        function showAddProduct() {
+            const html = `
+                <form onsubmit="handleAddProduct(event)">
+                    <div class="form-group">
+                        <label>اسم السلعة <span class="required">*</span></label>
+                        <input type="text" id="prodName" required placeholder="أدخل اسم السلعة">
+                    </div>
+                    <div class="form-group">
+                        <label>النوع</label>
+                        <select id="prodType">
+                            <option value="تيشيرت">تيشيرت</option>
+                            <option value="قميص">قميص</option>
+                            <option value="بنطلون">بنطلون</option>
+                            <option value="جاكت">جاكت</option>
+                            <option value="حذاء">حذاء</option>
+                            <option value="أخرى">أخرى</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>سعر الشراء</label>
+                            <input type="number" id="prodPurchase" min="0" step="0.01" placeholder="سعر الشراء">
+                        </div>
+                        <div class="form-group">
+                            <label>سعر البيع</label>
+                            <input type="number" id="prodSale" min="0" step="0.01" placeholder="سعر البيع">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>الكمية</label>
+                            <input type="number" id="prodQty" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label>المقاس</label>
+                            <input type="text" id="prodSize" placeholder="المقاس">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>اللون</label>
+                        <input type="text" id="prodColor" placeholder="اللون">
+                    </div>
+                    <div class="form-group">
+                        <label>المورد</label>
+                        <input type="text" id="prodSupplier" placeholder="اسم المورد">
+                    </div>
+                    <div class="form-group">
+                        <label>ملاحظات</label>
+                        <textarea id="prodNotes" placeholder="أي ملاحظات"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;"><i class="fas fa-save"></i> حفظ السلعة</button>
+                </form>
+            `;
+            showModal('<i class="fas fa-box"></i> إضافة سلعة جديدة', html);
+        }
+
+        async function handleAddProduct(e) {
+            e.preventDefault();
+            const name = document.getElementById('prodName').value.trim();
+            if (!name) { toast('❌ يرجى إدخال اسم السلعة', 'error'); return; }
+
+            try {
+                await addProduct({
+                    name,
+                    type: document.getElementById('prodType').value,
+                    purchasePrice: parseFloat(document.getElementById('prodPurchase').value) || 0,
+                    salePrice: parseFloat(document.getElementById('prodSale').value) || 0,
+                    quantity: parseInt(document.getElementById('prodQty').value) || 0,
+                    size: document.getElementById('prodSize').value.trim(),
+                    color: document.getElementById('prodColor').value.trim(),
+                    supplier: document.getElementById('prodSupplier').value.trim(),
+                    notes: document.getElementById('prodNotes').value.trim()
+                });
+                closeModal();
+                toast('✓ تم إضافة السلعة بنجاح', 'success');
+                await refreshAll();
+            } catch (err) { toast('❌ خطأ في إضافة السلعة', 'error'); }
+        }
+
+        async function editProduct(id) {
+            const product = await getProduct(id);
+            if (!product) { toast('❌ المنتج غير موجود', 'error'); return; }
+
+            const html = `
+                <form onsubmit="handleEditProduct(event, ${id})">
+                    <div class="form-group">
+                        <label>اسم السلعة <span class="required">*</span></label>
+                        <input type="text" id="editProdName" value="${product.name}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>النوع</label>
+                        <select id="editProdType">
+                            <option value="تيشيرت" ${product.type==='تيشيرت'?'selected':''}>تيشيرت</option>
+                            <option value="قميص" ${product.type==='قميص'?'selected':''}>قميص</option>
+                            <option value="بنطلون" ${product.type==='بنطلون'?'selected':''}>بنطلون</option>
+                            <option value="جاكت" ${product.type==='جاكت'?'selected':''}>جاكت</option>
+                            <option value="حذاء" ${product.type==='حذاء'?'selected':''}>حذاء</option>
+                            <option value="أخرى" ${product.type==='أخرى'?'selected':''}>أخرى</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>سعر الشراء</label>
+                            <input type="number" id="editProdPurchase" value="${product.purchasePrice||0}" min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>سعر البيع</label>
+                            <input type="number" id="editProdSale" value="${product.salePrice||0}" min="0" step="0.01">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>الكمية</label>
+                            <input type="number" id="editProdQty" value="${product.quantity||0}" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>المقاس</label>
+                            <input type="text" id="editProdSize" value="${product.size||''}">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>اللون</label>
+                        <input type="text" id="editProdColor" value="${product.color||''}">
+                    </div>
+                    <div class="form-group">
+                        <label>المورد</label>
+                        <input type="text" id="editProdSupplier" value="${product.supplier||''}">
+                    </div>
+                    <div class="form-group">
+                        <label>ملاحظات</label>
+                        <textarea id="editProdNotes">${product.notes||''}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;"><i class="fas fa-save"></i> حفظ التعديلات</button>
+                </form>
+            `;
+            showModal('<i class="fas fa-edit"></i> تعديل السلعة', html);
+        }
+
+        async function handleEditProduct(e, id) {
+            e.preventDefault();
+            const name = document.getElementById('editProdName').value.trim();
+            if (!name) { toast('❌ يرجى إدخال اسم السلعة', 'error'); return; }
+
+            try {
+                await updateProduct(id, {
+                    name,
+                    type: document.getElementById('editProdType').value,
+                    purchasePrice: parseFloat(document.getElementById('editProdPurchase').value) || 0,
+                    salePrice: parseFloat(document.getElementById('editProdSale').value) || 0,
+                    quantity: parseInt(document.getElementById('editProdQty').value) || 0,
+                    size: document.getElementById('editProdSize').value.trim(),
+                    color: document.getElementById('editProdColor').value.trim(),
+                    supplier: document.getElementById('editProdSupplier').value.trim(),
+                    notes: document.getElementById('editProdNotes').value.trim()
+                });
+                closeModal();
+                toast('✓ تم تعديل السلعة بنجاح', 'success');
+                await refreshAll();
+            } catch (err) { toast('❌ خطأ في تعديل السلعة', 'error'); }
+        }
+
+        // ---- Task CRUD ----
+        function showAddTask() {
+            const html = `
+                <form onsubmit="handleAddTask(event)">
+                    <div class="form-group">
+                        <label>المهمة <span class="required">*</span></label>
+                        <input type="text" id="taskTitle" required placeholder="أدخل المهمة">
+                    </div>
+                    <div class="form-group">
+                        <label>التفاصيل</label>
+                        <textarea id="taskDetails" placeholder="تفاصيل المهمة"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>التاريخ</label>
+                            <input type="date" id="taskDate">
+                        </div>
+                        <div class="form-group">
+                            <label>وقت التذكير</label>
+                            <input type="time" id="taskReminder">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>الأولوية</label>
+                        <select id="taskPriority">
+                            <option value="عادية">عادية</option>
+                            <option value="مهمة">مهمة</option>
+                            <option value="عاجلة">عاجلة</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;"><i class="fas fa-save"></i> حفظ المهمة</button>
+                </form>
+            `;
+            showModal('<i class="fas fa-plus"></i> إضافة مهمة', html);
+        }
+
+        async function handleAddTask(e) {
+            e.preventDefault();
+            const title = document.getElementById('taskTitle').value.trim();
+            if (!title) { toast('❌ يرجى إدخال المهمة', 'error'); return; }
+
+            try {
+                await addTask({
+                    title,
+                    details: document.getElementById('taskDetails').value.trim(),
+                    date: document.getElementById('taskDate').value,
+                    reminder: document.getElementById('taskReminder').value,
+                    priority: document.getElementById('taskPriority').value
+                });
+                closeModal();
+                toast('✓ تم إضافة المهمة بنجاح', 'success');
+                await refreshAll();
+            } catch (err) { toast('❌ خطأ في إضافة المهمة', 'error'); }
+        }
+
+        async function editTask(id) {
+            const task = await getTask(id);
+            if (!task) { toast('❌ المهمة غير موجودة', 'error'); return; }
+
+            const html = `
+                <form onsubmit="handleEditTask(event, ${id})">
+                    <div class="form-group">
+                        <label>المهمة <span class="required">*</span></label>
+                        <input type="text" id="editTaskTitle" value="${task.title}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>التفاصيل</label>
+                        <textarea id="editTaskDetails">${task.details||''}</textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>التاريخ</label>
+                            <input type="date" id="editTaskDate" value="${task.date||''}">
+                        </div>
+                        <div class="form-group">
+                            <label>وقت التذكير</label>
+                            <input type="time" id="editTaskReminder" value="${task.reminder||''}">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>الأولوية</label>
+                        <select id="editTaskPriority">
+                            <option value="عادية" ${task.priority==='عادية'?'selected':''}>عادية</option>
+                            <option value="مهمة" ${task.priority==='مهمة'?'selected':''}>مهمة</option>
+                            <option value="عاجلة" ${task.priority==='عاجلة'?'selected':''}>عاجلة</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;"><i class="fas fa-save"></i> حفظ التعديلات</button>
+                </form>
+            `;
+            showModal('<i class="fas fa-edit"></i> تعديل المهمة', html);
+        }
+
+        async function handleEditTask(e, id) {
+            e.preventDefault();
+            const title = document.getElementById('editTaskTitle').value.trim();
+            if (!title) { toast('❌ يرجى إدخال المهمة', 'error'); return; }
+
+            try {
+                await updateTask(id, {
+                    title,
+                    details: document.getElementById('editTaskDetails').value.trim(),
+                    date: document.getElementById('editTaskDate').value,
+                    reminder: document.getElementById('editTaskReminder').value,
+                    priority: document.getElementById('editTaskPriority').value
+                });
+                closeModal();
+                toast('✓ تم تعديل المهمة بنجاح', 'success');
+                await refreshAll();
+            } catch (err) { toast('❌ خطأ في تعديل المهمة', 'error'); }
+        }
+
+        // ---- Telegram Settings ----
+        async function saveTelegramSettings() {
+            const token = document.getElementById('telegramToken').value.trim();
+            const chatId = document.getElementById('telegramChatId').value.trim();
+
+            if (!token) { toast('❌ يرجى إدخال توكن البوت', 'error'); return; }
+            if (!chatId) { toast('❌ يرجى إدخال معرف الدردشة', 'error'); return; }
+
+            try {
+                const settings = await db.getAll('settings');
+                let t = settings.find(s => s.key === 'telegram_token');
+                let c = settings.find(s => s.key === 'telegram_chat_id');
+
+                if (t) { t.value = token;
+                    await db.put('settings', t); } else { await db.add('settings', { key: 'telegram_token', value: token }); }
+
+                if (c) { c.value = chatId;
+                    await db.put('settings', c); } else { await db.add('settings', { key: 'telegram_chat_id', value: chatId }); }
+
+                CONFIG.TELEGRAM_TOKEN = token;
+                CONFIG.TELEGRAM_CHAT_ID = chatId;
+
+                toast('✓ تم حفظ إعدادات Telegram', 'success');
+            } catch (e) { toast('❌ خطأ في حفظ الإعدادات', 'error'); }
+        }
+
+        async function testTelegram() {
+            const token = document.getElementById('telegramToken').value.trim() || CONFIG.TELEGRAM_TOKEN;
+            const chatId = document.getElementById('telegramChatId').value.trim() || CONFIG.TELEGRAM_CHAT_ID;
+
+            if (!token || !chatId) {
+                toast('❌ يرجى إدخال التوكن وChat ID أولاً', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: '✅ تم اختبار الاتصال بـ Telegram بنجاح!\nكشكولي يعمل بشكل ممتاز.'
+                    })
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    toast('✅ تم الاتصال بـ Telegram بنجاح', 'success');
+                } else {
+                    toast('❌ خطأ: ' + data.description, 'error');
+                }
+            } catch (e) { toast('❌ فشل الاتصال بـ Telegram', 'error'); }
+        }
+
+        // ---- Restore ----
+        document.getElementById('restoreFile').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            try {
+                const text = await file.text();
+                const result = await validateBackup(text);
+                const preview = document.getElementById('restorePreview');
+                if (!result.valid) {
+                    preview.innerHTML =
+                        `<div style="color:var(--danger);"><i class="fas fa-times-circle"></i> ${result.error}</div>`;
+                    preview.classList.add('visible');
+                    return;
+                }
+                preview.innerHTML = `
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:14px;">
+                        <div style="color:var(--success);"><i class="fas fa-check-circle"></i> الملف صالح</div>
+                        <div>العملاء: ${result.stats.customers}</div>
+                        <div>العمليات: ${result.stats.transactions}</div>
+                        <div>الفواتير: ${result.stats.invoices}</div>
+                        <div>المنتجات: ${result.stats.products}</div>
+                        <div>المهام: ${result.stats.tasks}</div>
+                        <div style="grid-column:1/-1;">تاريخ النسخة: ${formatDate(result.stats.exportedAt)}</div>
+                    </div>
+                    <div style="display:flex;gap:10px;margin-top:12px;">
+                        <button class="btn btn-primary" onclick="confirmRestore('replace')"><i class="fas fa-undo"></i> استبدال</button>
+                        <button class="btn btn-outline" onclick="confirmRestore('merge')"><i class="fas fa-code-branch"></i> دمج</button>
+                    </div>
+                    <div id="restoreConfirmMsg" style="margin-top:8px;font-size:13px;color:var(--text-light);"></div>
+                `;
+                preview.classList.add('visible');
+                window._restoreBackupData = result.backup;
+            } catch (err) { toast('❌ خطأ في قراءة الملف', 'error'); }
+            e.target.value = '';
+        });
+
+        async function handleTextRestore() {
+            const text = document.getElementById('restoreText').value.trim();
+            if (!text) { toast('❌ يرجى لصق النص أولاً', 'error'); return; }
+
+            const result = await validateBackup(text);
+            const preview = document.getElementById('restorePreview');
+            if (!result.valid) {
+                preview.innerHTML =
+                    `<div style="color:var(--danger);"><i class="fas fa-times-circle"></i> ${result.error}</div>`;
+                preview.classList.add('visible');
+                return;
+            }
+            preview.innerHTML = `
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:14px;">
+                    <div style="color:var(--success);"><i class="fas fa-check-circle"></i> البيانات صالحة</div>
+                    <div>العملاء: ${result.stats.customers}</div>
+                    <div>العمليات: ${result.stats.transactions}</div>
+                    <div>الفواتير: ${result.stats.invoices}</div>
+                    <div>المنتجات: ${result.stats.products}</div>
+                    <div>المهام: ${result.stats.tasks}</div>
+                    <div style="grid-column:1/-1;">تاريخ النسخة: ${formatDate(result.stats.exportedAt)}</div>
+                </div>
+                <div style="display:flex;gap:10px;margin-top:12px;">
+                    <button class="btn btn-primary" onclick="confirmRestore('replace')"><i class="fas fa-undo"></i> استبدال</button>
+                    <button class="btn btn-outline" onclick="confirmRestore('merge')"><i class="fas fa-code-branch"></i> دمج</button>
+                </div>
+                <div id="restoreConfirmMsg" style="margin-top:8px;font-size:13px;color:var(--text-light);"></div>
+            `;
+            preview.classList.add('visible');
+            window._restoreBackupData = result.backup;
+        }
+
+        async function confirmRestore(mode) {
+            const msg = document.getElementById('restoreConfirmMsg');
+            if (!window._restoreBackupData) { toast('❌ لا توجد بيانات للاستعادة', 'error'); return; }
+            const confirmMsg = mode === 'replace' ?
+                '⚠️ سيتم استبدال جميع البيانات الحالية. هل أنت متأكد؟' :
+                '📦 سيتم دمج البيانات مع البيانات الحالية. هل أنت متأكد؟';
+            if (!confirm(confirmMsg)) return;
+            msg.textContent = '⏳ جاري الاستعادة...';
+            try {
+                await restoreBackup(window._restoreBackupData, mode);
+                msg.innerHTML = '<span style="color:var(--success);">✓ تمت الاستعادة بنجاح</span>';
+                setTimeout(() => {
+                    document.getElementById('restorePreview').classList.remove('visible');
+                    refreshAll();
+                }, 1500);
+            } catch (err) {
+                msg.innerHTML = '<span style="color:var(--danger);">❌ خطأ في الاستعادة</span>';
+            }
+        }
+
+        // ============================================================
+        // SETUP EVENT LISTENERS
+        // ============================================================
+        function setupEventListeners() {
+            // Tab switching
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+                    this.classList.add('active');
+                    document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+                    if (this.dataset.tab === 'customers') renderCustomers();
+                    if (this.dataset.tab === 'invoices') renderInvoices();
+                    if (this.dataset.tab === 'products') renderProducts();
+                    if (this.dataset.tab === 'tasks') renderTasks();
+                    if (this.dataset.tab === 'archive') renderArchive();
+                });
+            });
+
+            // Global search
+            document.getElementById('globalSearch').addEventListener('input', debounce(async function() {
+                const q = this.value.trim();
+                const container = document.getElementById('searchResults');
+                if (!q) { container.classList.remove('has-results');
+                    container.innerHTML = ''; return; }
+
+                const customers = await getCustomers(false);
+                const results = customers.filter(c =>
+                    c.name.toLowerCase().includes(q.toLowerCase()) ||
+                    (c.phone && c.phone.includes(q)) ||
+                    (c.place && c.place.toLowerCase().includes(q.toLowerCase()))
+                );
+
+                if (!results.length) {
+                    container.innerHTML =
+                        `<div class="search-result-item" style="justify-content:center;color:var(--text-light);">لا توجد نتائج</div>`;
+                    container.classList.add('has-results');
+                    return;
+                }
+
+                container.innerHTML = results.map(c => `
+                    <div class="search-result-item" onclick="showCustomerDetail(${c.id})">
+                        <div>
+                            <div class="name">${c.name}</div>
+                            <div class="detail">${c.phone || ''} ${c.place || ''}</div>
+                        </div>
+                        <span style="font-weight:700;color:${(c.balance||0)>0?'var(--danger)':'var(--success)'};">${formatCurrency(c.balance||0)}</span>
+                    </div>
+                `).join('');
+                container.classList.add('has-results');
+            }, 300));
+
+            // Invoice search
+            document.getElementById('invoiceSearch').addEventListener('input', debounce(async function() {
+                const q = this.value.trim();
+                const invoices = await searchInvoices(q);
+                const container = document.getElementById('invoicesList');
+                if (!invoices.length) {
+                    container.innerHTML =
+                        `<div class="empty-state"><i class="fas fa-search"></i><h3>لا توجد نتائج</h3></div>`;
+                    return;
+                }
+                container.innerHTML = invoices.map(i => {
+                    const statusClass = i.status === 'مدفوعة' ? 'badge-success' :
+                        i.status === 'مدفوعة جزئياً' ? 'badge-warning' : 'badge-danger';
+                    return `
+                        <div class="card-item" onclick="showInvoiceDetail(${i.id})">
+                            <div class="card-header">
+                                <div class="card-title"><i class="fas fa-file-invoice"></i> ${i.invoiceNumber}</div>
+                                <span class="badge ${statusClass}">${i.status}</span>
+                            </div>
+                            <div class="card-meta">
+                                <span><i class="fas fa-user"></i> ${i.customerName}</span>
+                                <span><i class="fas fa-calendar"></i> ${formatDate(i.createdAt)}</span>
+                                <span><i class="fas fa-coins"></i> ${formatCurrency(i.total)}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }, 300));
+
+            // Archive search
+            document.getElementById('archiveSearch').addEventListener('input', debounce(async function() {
+                const q = this.value.trim();
+                let customers = await getCustomers(true);
+                if (q) {
+                    const ql = q.toLowerCase();
+                    customers = customers.filter(c =>
+                        c.name.toLowerCase().includes(ql) ||
+                        (c.phone && c.phone.includes(q)) ||
+                        (c.place && c.place.toLowerCase().includes(ql))
+                    );
+                }
+                const container = document.getElementById('archiveList');
+                if (!customers.length) {
+                    container.innerHTML =
+                        `<div class="empty-state"><i class="fas fa-archive"></i><h3>لا توجد نتائج</h3></div>`;
+                    return;
+                }
+                container.innerHTML = customers.map(c => `
+                    <div class="card-item" onclick="showCustomerDetail(${c.id})">
+                        <div class="card-header">
+                            <div class="card-title"><i class="fas fa-user"></i> ${c.name}</div>
+                            <span class="badge badge-secondary">مؤرشف</span>
+                        </div>
+                        <div class="card-meta">
+                            ${c.phone ? `<span><i class="fas fa-phone"></i> ${c.phone}</span>` : ''}
+                            ${c.place ? `<span><i class="fas fa-map-marker-alt"></i> ${c.place}</span>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }, 300));
+
+            // Modal overlay close
+            document.getElementById('modalOverlay').addEventListener('click', function(e) {
+                if (e.target === this) closeModal();
+            });
+        }
+
+        // ============================================================
+        // INITIALIZATION
+        // ============================================================
+        async function initApp() {
+            try {
+                await db.open();
+                await loadSettings();
+
+                const settings = await db.getAll('settings');
+                const token = settings.find(s => s.key === 'telegram_token');
+                const chatId = settings.find(s => s.key === 'telegram_chat_id');
+                if (token) document.getElementById('telegramToken').value = token.value;
+                if (chatId) document.getElementById('telegramChatId').value = chatId.value || CONFIG.TELEGRAM_CHAT_ID;
+
+                const pending = await db.getAll('pending');
+                pendingChanges = pending.map(p => ({ ...p, data: JSON.parse(p.data) }));
+
+                appReady = true;
+                await refreshAll();
+
+                startSyncService();
+
+                window.addEventListener('online', async () => {
+                    isOnline = true;
+                    toast('🔄 تم استعادة الاتصال، جاري المزامنة...', 'info');
+                    await processPending();
+                });
+                window.addEventListener('offline', () => {
+                    isOnline = false;
+                    updateSyncStatus('offline');
+                });
+
+                setupEventListeners();
+
+                if (isOnline) {
+                    setTimeout(processPending, 2000);
+                }
+
+                toast('✓ تم تشغيل كشكولي بنجاح', 'success');
+
+            } catch (e) {
+                console.error('Init error:', e);
+                toast('❌ خطأ في تهيئة التطبيق', 'error');
+            }
+        }
+
+        async function loadSettings() {
+            const settings = await db.getAll('settings');
+            const token = settings.find(s => s.key === 'telegram_token');
+            const chatId = settings.find(s => s.key === 'telegram_chat_id');
+            if (token) CONFIG.TELEGRAM_TOKEN = token.value;
+            if (chatId) CONFIG.TELEGRAM_CHAT_ID = chatId.value;
+        }
+
+        // ============================================================
+        // GLOBAL EXPOSURE
+        // ============================================================
+        window.showCustomerDetail = showCustomerDetail;
+        window.showCustomerTransactions = showCustomerTransactions;
+        window.showCustomerInvoices = showCustomerInvoices;
+        window.showAddCustomer = showAddCustomer;
+        window.handleAddCustomer = handleAddCustomer;
+        window.editCustomer = editCustomer;
+        window.handleEditCustomer = handleEditCustomer;
+        window.confirmDeleteCustomer = confirmDeleteCustomer;
+        window.handleDeleteCustomer = handleDeleteCustomer;
+        window.showAddSale = showAddSale;
+        window.handleAddSale = handleAddSale;
+        window.addSaleItem = addSaleItem;
+        window.removeSaleItem = removeSaleItem;
+        window.showAddPayment = showAddPayment;
+        window.handleAddPayment = handleAddPayment;
+        window.editTransaction = editTransaction;
+        window.handleEditTransaction = handleEditTransaction;
+        window.deleteTransaction = deleteTransaction;
+        window.archiveCustomer = archiveCustomer;
+        window.unarchiveCustomer = unarchiveCustomer;
+        window.showAddProduct = showAddProduct;
+        window.handleAddProduct = handleAddProduct;
+        window.editProduct = editProduct;
+        window.handleEditProduct = handleEditProduct;
+        window.deleteProduct = deleteProduct;
+        window.showAddTask = showAddTask;
+        window.handleAddTask = handleAddTask;
+        window.editTask = editTask;
+        window.handleEditTask = handleEditTask;
+        window.toggleTask = toggleTask;
+        window.deleteTask = deleteTask;
+        window.showInvoiceDetail = showInvoiceDetail;
+        window.printInvoice = printInvoice;
+        window.printInvoiceFromArea = printInvoiceFromArea;
+        window.saveInvoicePDF = saveInvoicePDF;
+        window.shareInvoice = shareInvoice;
+        window.shareInvoiceFromArea = shareInvoiceFromArea;
+        window.saveTelegramSettings = saveTelegramSettings;
+        window.testTelegram = testTelegram;
+        window.handleTextRestore = handleTextRestore;
+        window.confirmRestore = confirmRestore;
+        window.refreshAll = refreshAll;
+        window.closeModal = closeModal;
+
+        // ============================================================
+        // START APP
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', initApp);
+        console.log('🚀 كشكولي - نظام إدارة محل الملابس');
+        console.log('👨‍💻 المطور: محمد فارس');
+        console.log('📦 الإصدار: 1.0.0');
+    </script>
+
+</body>
+</html>
