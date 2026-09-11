@@ -834,7 +834,7 @@
             TELEGRAM_TOKEN: '7144838322:AAEYLHsGFavk7BAlHqfcsV5XuXvOEadS6KA',
             TELEGRAM_CHAT_ID: '6113061454',
             DB_NAME: 'kashkoli',
-            DB_VERSION: 1
+            DB_VERSION: 3
         };
 
         // ============================================================
@@ -1524,121 +1524,156 @@
 async function restoreBackup(backup, mode = 'replace') {
     try {
         // ============================================================
-        // معالجة الـ transactions - تحويل جميع السلع إلى معاملات منفصلة
+        // 1. التحقق من صحة البيانات
         // ============================================================
-        const processedTransactions = [];
-        
-        for (const t of backup.transactions) {
-            // إذا كانت المعاملة تحتوي على items (تنسيق جديد مع سلع متعددة)
-            if (t.items && Array.isArray(t.items) && t.items.length > 0) {
-                // نقوم بإنشاء معاملة منفصلة لكل سلعة
-                for (const item of t.items) {
-                    const itemTotal = (item.price || 0) * (item.quantity || 1);
-                    // توزيع المبلغ المدفوع على السلع بنسبة
-                    const totalAmount = t.amount || t.items.reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0);
-                    const ratio = totalAmount > 0 ? (itemTotal / totalAmount) : 0;
-                    const paymentShare = (t.payment || 0) * ratio;
-                    
-                    processedTransactions.push({
-                        customerId: t.customerId,
-                        type: t.type || 'sale',
-                        amount: itemTotal,
-                        payment: Math.round(paymentShare * 100) / 100, // تقريب لـ 2 Decimals
-                        balanceBefore: t.balanceBefore || 0,
-                        balanceAfter: t.balanceAfter || 0,
-                        item: item.item || 'سلعة',
-                        quantity: item.quantity || 1,
-                        size: item.size || t.size || '',
-                        color: item.color || t.color || '',
-                        notes: item.notes || t.notes || '',
-                        invoiceId: t.invoiceId || null,
-                        createdAt: t.createdAt || new Date().toISOString(),
-                        // نحتفظ بالبيانات الأصلية
-                        originalItems: t.items,
-                        originalTransactionId: t.id
-                    });
-                }
-            } else {
-                // التنسيق القديم (سلعة واحدة)
-                processedTransactions.push({
-                    ...t,
-                    item: t.item || 'سلعة',
-                    quantity: t.quantity || 1,
-                    size: t.size || '',
-                    color: t.color || '',
-                    notes: t.notes || '',
-                    items: t.items || [{ item: t.item || 'سلعة', quantity: t.quantity || 1, price: t.amount || 0 }]
-                });
-            }
+        if (!backup || typeof backup !== 'object') {
+            throw new Error('البيانات غير صالحة');
         }
 
         // ============================================================
-        // معالجة الـ invoices - الحفاظ على جميع السلع
+        // 2. تجهيز العملاء
         // ============================================================
-        const processedInvoices = backup.invoices.map(i => {
-            // إذا كانت الفاتورة تحتوي على items (تنسيق جديد)
-            if (i.items && Array.isArray(i.items) && i.items.length > 0) {
-                return {
-                    ...i,
-                    items: i.items.map(item => ({
-                        item: item.item || 'سلعة',
-                        quantity: item.quantity || 1,
-                        price: item.price || 0,
-                        total: (item.price || 0) * (item.quantity || 1)
-                    }))
-                };
+        const processedCustomers = (backup.customers || []).map(c => ({
+            id: c.id,
+            name: c.name || 'بدون اسم',
+            phone: c.phone || '',
+            place: c.place || '',
+            notes: c.notes || '',
+            balance: Number(c.balance) || 0,
+            status: c.status || ((Number(c.balance) || 0) > 0 ? 'عليه مبلغ' : 'تم السداد'),
+            archived: c.archived === true,
+            createdAt: c.createdAt || new Date().toISOString(),
+            updatedAt: c.updatedAt || c.createdAt || new Date().toISOString()
+        }));
+
+        // ============================================================
+        // 3. تجهيز العمليات (بدون تفكيك!)
+        // ============================================================
+        const processedTransactions = (backup.transactions || []).map(t => {
+            let items = [];
+            if (Array.isArray(t.items) && t.items.length > 0) {
+                items = t.items.map(item => ({
+                    item: item.item || 'سلعة',
+                    quantity: Number(item.quantity) || 1,
+                    price: Number(item.price) || 0,
+                    size: item.size || '',
+                    color: item.color || ''
+                }));
+            } else {
+                items = [{
+                    item: t.item || 'سلعة',
+                    quantity: Number(t.quantity) || 1,
+                    price: Number(t.amount) || 0,
+                    size: t.size || '',
+                    color: t.color || ''
+                }];
             }
-            // التنسيق القديم
+
             return {
-                ...i,
-                items: i.items || [{ 
-                    item: i.item || 'سلعة', 
-                    quantity: i.quantity || 1, 
-                    price: i.total || 0,
-                    total: i.total || 0
-                }]
+                id: t.id,
+                customerId: t.customerId,
+                type: t.type || 'sale',
+                amount: Number(t.amount) || 0,
+                payment: Number(t.payment) || 0,
+                balanceBefore: Number(t.balanceBefore) || 0,
+                balanceAfter: Number(t.balanceAfter) || 0,
+                items: items,
+                notes: t.notes || '',
+                invoiceId: t.invoiceId || null,
+                createdAt: t.createdAt || new Date().toISOString()
             };
         });
 
         // ============================================================
-        // معالجة الـ customers - التأكد من وجود الحقول المطلوبة
+        // 4. تجهيز الفواتير
         // ============================================================
-        const processedCustomers = backup.customers.map(c => ({
-            ...c,
-            notes: c.notes || '',
-            status: c.status || (c.balance > 0 ? 'عليه مبلغ' : 'تم السداد'),
-            archived: c.archived || false,
-            createdAt: c.createdAt || new Date().toISOString(),
-            updatedAt: c.updatedAt || new Date().toISOString()
+        const processedInvoices = (backup.invoices || []).map(i => {
+            let items = [];
+            if (Array.isArray(i.items) && i.items.length > 0) {
+                items = i.items.map(item => ({
+                    item: item.item || 'سلعة',
+                    quantity: Number(item.quantity) || 1,
+                    price: Number(item.price) || 0,
+                    size: item.size || '',
+                    color: item.color || ''
+                }));
+            } else {
+                items = [{
+                    item: i.item || 'سلعة',
+                    quantity: Number(i.quantity) || 1,
+                    price: Number(i.total) || 0,
+                    size: '',
+                    color: ''
+                }];
+            }
+
+            return {
+                id: i.id,
+                customerId: i.customerId,
+                customerName: i.customerName || '',
+                customerPhone: i.customerPhone || '',
+                customerPlace: i.customerPlace || '',
+                invoiceNumber: i.invoiceNumber || `INV-${Date.now()}`,
+                items: items,
+                total: Number(i.total) || 0,
+                paid: Number(i.paid) || 0,
+                balance: Number(i.balance) || 0,
+                status: i.status || 'غير مدفوعة',
+                createdAt: i.createdAt || new Date().toISOString(),
+                transactionId: i.transactionId || null
+            };
+        });
+
+        // ============================================================
+        // 5. تجهيز المنتجات
+        // ============================================================
+        const processedProducts = (backup.products || []).map(p => ({
+            id: p.id,
+            name: p.name || 'بدون اسم',
+            type: p.type || 'أخرى',
+            purchasePrice: Number(p.purchasePrice) || 0,
+            salePrice: Number(p.salePrice) || 0,
+            quantity: Number(p.quantity) || 0,
+            size: p.size || '',
+            color: p.color || '',
+            supplier: p.supplier || '',
+            notes: p.notes || '',
+            createdAt: p.createdAt || new Date().toISOString(),
+            updatedAt: p.updatedAt || p.createdAt || new Date().toISOString()
         }));
 
         // ============================================================
-        // إعادة حساب الأرصدة بعد تحويل جميع المعاملات
+        // 6. تجهيز المهام
         // ============================================================
-        // حساب الرصيد لكل عميل بناءً على المعاملات الجديدة
-        const customerBalances = {};
-        for (const t of processedTransactions) {
-            const customerId = t.customerId;
-            if (!customerBalances[customerId]) customerBalances[customerId] = 0;
-            if (t.type === 'sale') {
-                customerBalances[customerId] += t.amount - (t.payment || 0);
-            } else if (t.type === 'payment') {
-                customerBalances[customerId] -= t.amount;
-            }
-        }
-
-        // تحديث أرصدة العملاء
-        for (const c of processedCustomers) {
-            if (customerBalances[c.id] !== undefined) {
-                c.balance = Math.round(customerBalances[c.id] * 100) / 100;
-                c.status = c.balance > 0 ? 'عليه مبلغ' : 'تم السداد';
-            }
-        }
+        const processedTasks = (backup.tasks || []).map(t => ({
+            id: t.id,
+            title: t.title || 'مهمة',
+            details: t.details || '',
+            date: t.date || '',
+            reminder: t.reminder || '',
+            priority: t.priority || 'عادية',
+            completed: t.completed === true,
+            createdAt: t.createdAt || new Date().toISOString(),
+            updatedAt: t.updatedAt || t.createdAt || new Date().toISOString()
+        }));
 
         // ============================================================
-        // تنفيذ الاستعادة
+        // 7. تجهيز الإعدادات
+        // ============================================================
+        const processedSettings = (backup.settings || []).map(s => ({
+            id: s.id,
+            key: s.key,
+            value: s.value
+        }));
+
+        // ============================================================
+        // 8. التنفيذ - بناءً على الوضع
         // ============================================================
         if (mode === 'replace') {
+            // ═══════════════════════════════════════════════════════
+            // وضع الاستبدال الكامل - يحفظ كل شيء بـ IDs الأصلية
+            // ═══════════════════════════════════════════════════════
+            
             await db.clear('customers');
             await db.clear('transactions');
             await db.clear('invoices');
@@ -1646,43 +1681,183 @@ async function restoreBackup(backup, mode = 'replace') {
             await db.clear('tasks');
             await db.clear('pending');
             
-            for (const c of processedCustomers) await db.add('customers', c);
-            for (const t of processedTransactions) await db.add('transactions', t);
-            for (const i of processedInvoices) await db.add('invoices', i);
-            for (const p of backup.products || []) await db.add('products', p);
-            for (const t of backup.tasks || []) await db.add('tasks', t);
+            for (const c of processedCustomers) {
+                await db.put('customers', c);
+            }
             
-            toast(`✓ تم استبدال البيانات بنجاح (${processedCustomers.length} عميل، ${processedTransactions.length} معاملة)`, 'success');
+            for (const t of processedTransactions) {
+                await db.put('transactions', t);
+            }
             
-        } else if (mode === 'merge') {
-            const mergeStore = async (store, items) => {
-                const existing = await db.getAll(store);
-                const ids = new Set(existing.map(i => i.id));
-                let added = 0;
-                for (const item of items) {
-                    if (!ids.has(item.id)) { 
-                        await db.add(store, item);
-                        added++;
-                    }
+            for (const i of processedInvoices) {
+                await db.put('invoices', i);
+            }
+            
+            for (const p of processedProducts) {
+                await db.put('products', p);
+            }
+            
+            for (const t of processedTasks) {
+                await db.put('tasks', t);
+            }
+            
+            for (const s of processedSettings) {
+                if (s.key && s.key !== 'telegram_token' && s.key !== 'telegram_chat_id') {
+                    await db.put('settings', s);
                 }
-                return added;
-            };
+            }
             
-            const customersAdded = await mergeStore('customers', processedCustomers);
-            const transactionsAdded = await mergeStore('transactions', processedTransactions);
-            const invoicesAdded = await mergeStore('invoices', processedInvoices);
-            await mergeStore('products', backup.products || []);
-            await mergeStore('tasks', backup.tasks || []);
+            // إعادة حساب أرصدة العملاء من العمليات
+            const allCustomers = await db.getAll('customers');
+            for (const c of allCustomers) {
+                const customerTx = await db.getByIndex('transactions', 'customerId', c.id);
+                let balance = 0;
+                const sortedTx = customerTx.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                for (const t of sortedTx) {
+                    if (t.type === 'sale') {
+                        balance += t.amount - (t.payment || 0);
+                    } else if (t.type === 'payment') {
+                        balance -= t.amount;
+                    }
+                    t.balanceAfter = Math.round(balance * 100) / 100;
+                    await db.put('transactions', t);
+                }
+                c.balance = Math.round(balance * 100) / 100;
+                c.status = c.balance > 0 ? 'عليه مبلغ' : 'تم السداد';
+                await db.put('customers', c);
+            }
             
-            toast(`✓ تم دمج البيانات بنجاح (${customersAdded} عميل، ${transactionsAdded} معاملة، ${invoicesAdded} فاتورة)`, 'success');
+            toast(`✓ تم استبدال كل البيانات بنجاح (${processedCustomers.length} عميل، ${processedTransactions.length} عملية، ${processedInvoices.length} فاتورة، ${processedProducts.length} منتج، ${processedTasks.length} مهمة)`, 'success');
+            
+        } else {
+            // ═══════════════════════════════════════════════════════
+            // وضع الدمج الذكي - يحول IDs العملاء ويربط العمليات
+            // ═══════════════════════════════════════════════════════
+            
+            const existingCustomers = await db.getAll('customers');
+            const existingTx = await db.getAll('transactions');
+            const existingInv = await db.getAll('invoices');
+            const existingProd = await db.getAll('products');
+            const existingTasks = await db.getAll('tasks');
+            
+            const customerIdMap = {};
+            let customersAdded = 0;
+            
+            for (const c of processedCustomers) {
+                const exists = existingCustomers.find(ec => 
+                    ec.name.trim() === c.name.trim() && 
+                    (ec.phone || '') === (c.phone || '')
+                );
+                
+                if (exists) {
+                    customerIdMap[c.id] = exists.id;
+                } else {
+                    const { id, ...customerData } = c;
+                    const newId = await db.add('customers', customerData);
+                    customerIdMap[c.id] = newId;
+                    customersAdded++;
+                }
+            }
+            
+            let txAdded = 0;
+            for (const t of processedTransactions) {
+                const newCustomerId = customerIdMap[t.customerId] || t.customerId;
+                
+                const isDuplicate = existingTx.some(et => 
+                    et.customerId === newCustomerId &&
+                    et.createdAt === t.createdAt &&
+                    Math.abs(et.amount - t.amount) < 0.01 &&
+                    et.type === t.type
+                );
+                
+                if (!isDuplicate) {
+                    const { id, ...txData } = t;
+                    txData.customerId = newCustomerId;
+                    await db.add('transactions', txData);
+                    txAdded++;
+                }
+            }
+            
+            let invAdded = 0;
+            for (const i of processedInvoices) {
+                const newCustomerId = customerIdMap[i.customerId] || i.customerId;
+                
+                const isDuplicate = existingInv.some(ei => 
+                    ei.invoiceNumber === i.invoiceNumber
+                );
+                
+                if (!isDuplicate) {
+                    const { id, ...invData } = i;
+                    invData.customerId = newCustomerId;
+                    await db.add('invoices', invData);
+                    invAdded++;
+                }
+            }
+            
+            let prodAdded = 0;
+            for (const p of processedProducts) {
+                const isDuplicate = existingProd.some(ep => 
+                    ep.name === p.name && 
+                    (ep.size || '') === (p.size || '') && 
+                    (ep.color || '') === (p.color || '')
+                );
+                if (!isDuplicate) {
+                    const { id, ...prodData } = p;
+                    await db.add('products', prodData);
+                    prodAdded++;
+                }
+            }
+            
+            let tasksAdded = 0;
+            for (const t of processedTasks) {
+                const isDuplicate = existingTasks.some(et => 
+                    et.title === t.title && et.createdAt === t.createdAt
+                );
+                if (!isDuplicate) {
+                    const { id, ...taskData } = t;
+                    await db.add('tasks', taskData);
+                    tasksAdded++;
+                }
+            }
+            
+            // إعادة حساب أرصدة جميع العملاء
+            const allCustomers = await db.getAll('customers');
+            for (const c of allCustomers) {
+                const customerTx = await db.getByIndex('transactions', 'customerId', c.id);
+                let balance = 0;
+                const sortedTx = customerTx.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                for (const t of sortedTx) {
+                    if (t.type === 'sale') {
+                        balance += t.amount - (t.payment || 0);
+                    } else if (t.type === 'payment') {
+                        balance -= t.amount;
+                    }
+                    t.balanceAfter = Math.round(balance * 100) / 100;
+                    await db.put('transactions', t);
+                }
+                c.balance = Math.round(balance * 100) / 100;
+                c.status = c.balance > 0 ? 'عليه مبلغ' : 'تم السداد';
+                await db.put('customers', c);
+            }
+            
+            toast(`✓ تم دمج البيانات (${customersAdded} عميل جديد، ${txAdded} عملية، ${invAdded} فاتورة، ${prodAdded} منتج، ${tasksAdded} مهمة)`, 'success');
         }
-        
+
+        // ============================================================
+        // 9. تسجيل العملية وإرسال نسخة جديدة
+        // ============================================================
         pendingChanges = [];
+        await addPendingChange('restore_backup', { 
+            restoredAt: new Date().toISOString(), 
+            mode: mode 
+        });
+        
         await refreshAll();
         
-    } catch (e) { 
+    } catch (e) {
+        console.error('Restore error:', e);
         toast('❌ خطأ في استعادة البيانات: ' + e.message, 'error');
-        console.error(e); 
+        throw e;
     }
 }
         // ---- Render Functions ----
@@ -3166,22 +3341,25 @@ async function restoreBackup(backup, mode = 'replace') {
                     setTimeout(processPending, 2000);
                 }
 
-                toast('✓ تم تشغيل كشكولي بنجاح', 'success');
+        toast('✓ تم تشغيل كشكولي بنجاح', 'success');
 
-            } catch (e) {
-                console.error('Init error:', e);
-                toast('❌ خطأ في تهيئة التطبيق', 'error');
-            }
-        }
+    } catch (e) {
+        console.error('❌ Init error name:', e.name);
+        console.error('❌ Init error message:', e.message);
+        console.error('❌ Init error code:', e.code);
+        console.error('❌ Init error stack:', e.stack);
+        console.error('❌ Full error:', e);
+        toast('❌ خطأ في تهيئة التطبيق: ' + (e.name || '') + ' - ' + (e.message || ''), 'error');
+    }
+}
 
-        async function loadSettings() {
-            const settings = await db.getAll('settings');
-            const token = settings.find(s => s.key === 'telegram_token');
-            const chatId = settings.find(s => s.key === 'telegram_chat_id');
-            if (token) CONFIG.TELEGRAM_TOKEN = token.value;
-            if (chatId) CONFIG.TELEGRAM_CHAT_ID = chatId.value;
-        }
-
+async function loadSettings() {
+    const settings = await db.getAll('settings');
+    const token = settings.find(s => s.key === 'telegram_token');
+    const chatId = settings.find(s => s.key === 'telegram_chat_id');
+    if (token) CONFIG.TELEGRAM_TOKEN = token.value;
+    if (chatId) CONFIG.TELEGRAM_CHAT_ID = chatId.value;
+}
         // ============================================================
         // GLOBAL EXPOSURE
         // ============================================================
