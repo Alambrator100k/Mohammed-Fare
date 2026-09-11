@@ -1896,45 +1896,50 @@ async function restoreBackup(backup, mode = 'replace') {
             document.getElementById('statTasks').textContent = tasks.filter(t => !t.completed).length;
         }
 
-        async function renderCustomers() {
-            const container = document.getElementById('customersList');
-            const customers = await getCustomers(false);
-            if (!customers.length) {
-                container.innerHTML =
-                    `<div class="empty-state"><i class="fas fa-users"></i><h3>لا يوجد عملاء</h3><p>أضف عميلاً جديداً للبدء</p></div>`;
-                return;
-            }
-            container.innerHTML = customers.map(c => {
-                const bal = c.balance || 0;
-                const statusClass = bal > 0 ? 'balance-positive' : 'balance-zero';
-                const badge = bal > 0 ?
-                    `<span class="badge badge-danger">عليه مبلغ</span>` :
-                    `<span class="badge badge-success">تم السداد</span>`;
-                return `
-                    <div class="card-item" onclick="showCustomerDetail(${c.id})">
-                        <div class="card-header">
-                            <div class="card-title"><i class="fas fa-user"></i> ${c.name}</div>
-                            ${badge}
-                        </div>
-                        <div class="card-meta">
-                            ${c.phone ? `<span><i class="fas fa-phone"></i> ${c.phone}</span>` : ''}
-                            ${c.place ? `<span><i class="fas fa-map-marker-alt"></i> ${c.place}</span>` : ''}
-                            <span><i class="fas fa-calendar"></i> ${formatDate(c.updatedAt)}</span>
-                        </div>
-                        <div class="${statusClass}" style="margin-top:4px;">الرصيد: ${formatCurrency(bal)}</div>
-                        <div class="card-actions" onclick="event.stopPropagation()">
-                            <button class="btn btn-primary btn-sm" onclick="showCustomerDetail(${c.id})"><i class="fas fa-eye"></i> فتح</button>
-                            <button class="btn btn-success btn-sm" onclick="showAddSale(${c.id})"><i class="fas fa-shopping-cart"></i> بيع</button>
-                            <button class="btn btn-warning btn-sm" onclick="showAddPayment(${c.id})"><i class="fas fa-hand-holding-usd"></i> دفع</button>
-                            <button class="btn btn-outline btn-sm" onclick="showCustomerInvoices(${c.id})"><i class="fas fa-file-invoice"></i> فواتير</button>
-                            <button class="btn btn-outline btn-sm" onclick="editCustomer(${c.id})"><i class="fas fa-edit"></i> تعديل</button>
-                            <button class="btn btn-danger btn-sm" onclick="confirmDeleteCustomer(${c.id})"><i class="fas fa-trash"></i> حذف</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
+async function renderCustomers() {
+    const container = document.getElementById('customersList');
+    let customers = await getCustomers(false);
+    
+    // ✅ الترتيب: الأحدث أولاً (بناءً على updatedAt أو createdAt)
+    customers = customers.sort((a, b) => 
+        new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0)
+    );
+    
+    if (!customers.length) {
+        container.innerHTML =
+            `<div class="empty-state"><i class="fas fa-users"></i><h3>لا يوجد عملاء</h3><p>أضف عميلاً جديداً للبدء</p></div>`;
+        return;
+    }
+    container.innerHTML = customers.map(c => {
+        const bal = c.balance || 0;
+        const statusClass = bal > 0 ? 'balance-positive' : 'balance-zero';
+        const badge = bal > 0 ?
+            `<span class="badge badge-danger">عليه مبلغ</span>` :
+            `<span class="badge badge-success">تم السداد</span>`;
+        return `
+            <div class="card-item" onclick="showCustomerDetail(${c.id})">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-user"></i> ${c.name}</div>
+                    ${badge}
+                </div>
+                <div class="card-meta">
+                    ${c.phone ? `<span><i class="fas fa-phone"></i> ${c.phone}</span>` : ''}
+                    ${c.place ? `<span><i class="fas fa-map-marker-alt"></i> ${c.place}</span>` : ''}
+                    <span><i class="fas fa-calendar"></i> ${formatDate(c.updatedAt)}</span>
+                </div>
+                <div class="${statusClass}" style="margin-top:4px;">الرصيد: ${formatCurrency(bal)}</div>
+                <div class="card-actions" onclick="event.stopPropagation()">
+                    <button class="btn btn-primary btn-sm" onclick="showCustomerDetail(${c.id})"><i class="fas fa-eye"></i> فتح</button>
+                    <button class="btn btn-success btn-sm" onclick="showAddSale(${c.id})"><i class="fas fa-shopping-cart"></i> بيع</button>
+                    <button class="btn btn-warning btn-sm" onclick="showAddPayment(${c.id})"><i class="fas fa-hand-holding-usd"></i> دفع</button>
+                    <button class="btn btn-outline btn-sm" onclick="showCustomerInvoices(${c.id})"><i class="fas fa-file-invoice"></i> فواتير</button>
+                    <button class="btn btn-outline btn-sm" onclick="editCustomer(${c.id})"><i class="fas fa-edit"></i> تعديل</button>
+                    <button class="btn btn-danger btn-sm" onclick="confirmDeleteCustomer(${c.id})"><i class="fas fa-trash"></i> حذف</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
         async function renderInvoices() {
             const container = document.getElementById('invoicesList');
             const invoices = await getInvoices();
@@ -3406,7 +3411,6 @@ async function loadSettings() {
         window.confirmRestore = confirmRestore;
         window.refreshAll = refreshAll;
         window.closeModal = closeModal;
-
         // ============================================================
         // START APP
         // ============================================================
